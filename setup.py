@@ -12,7 +12,6 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-
 long_description = 'A toolbox' \
                    ' containing multi useful pythonic utils, functions, decorators etc.'
 
@@ -24,9 +23,9 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.1.0',
+    version='1.1.1',
 
-    description = 'a toolbox with pythonic utils, tools',
+    description='a toolbox with pythonic utils, tools',
     long_description=long_description,
 
     # The project's main homepage.
@@ -71,6 +70,10 @@ setup(
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
-      py_modules=["pythonic_toolbox"],
+    py_modules=["pythonic_toolbox"],
+
+    install_requires=[
+        'pytest'
+    ]
 
 )
