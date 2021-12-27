@@ -1,4 +1,4 @@
-from typing import Any, List, Iterable, Union, Optional, Hashable
+from typing import Any, List, Iterable, Union, Optional, Hashable, Callable
 from collections import defaultdict
 import json
 
@@ -86,9 +86,20 @@ def sort_with_custom_orders(values: List[Any],
     return sorted_values
 
 
-def until(values: Optional[Union[List[Any], Iterable]], terminate, default=None) -> Any:
+def until(values: Optional[Union[List[Any], Iterable]],
+          terminate: Optional[Callable[[Any], bool]] = None,
+          default=None) -> Any:
+    class Empty:
+        pass
+
+    UNSIGNED = Empty()
+
     if values is None:
         return default
+
+    if terminate is None:
+        terminate = lambda v: v is not UNSIGNED
+
     if isinstance(values, (list, Iterable)):
         for i in values:
             if terminate(i):
@@ -105,6 +116,7 @@ if __name__ == '__main__':
     import pytest
 
     counter = count(1, 2)  # generator of odd numbers: 1, 3, 5, 7 ...
+    assert until([], default=3) == 3  # nothing provided, return default
     assert until(counter, lambda x: x > 10) == 11
     assert until([1, 2, 3], lambda x: x > 10, default=11) == 11
     assert until(None, lambda x: x > 10, default=11) == 11
