@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, List, Hashable, Union
 
 
 def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = None, default=None):
@@ -10,7 +10,7 @@ def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = Non
     if terminate is None:
         terminate = lambda v: v is not UNSIGNED
 
-    from list_utils import until
+    from pythonic_toolbox.utils.list_utils import until
 
     # default is for value
     val = default
@@ -20,13 +20,25 @@ def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = Non
     return val
 
 
-if __name__ == '__main__':
-    data = {'full_name': 'Albert Lee', 'pen_name': None}
-    assert dict_until(data, keys=['name', 'full_name']) == 'Albert Lee'
-    assert dict_until(data, keys=['full_name', 'name']) == 'Albert Lee'
-    assert dict_until(data, keys=['name', 'english_name']) is None
-    assert dict_until(data, keys=['name', 'english_name'], default='anonymous') == 'anonymous'
-    # test when pen_name is set None on purpose
-    assert dict_until(data, keys=['pen_name'], default='anonymous') is None
-    # test when value with None value is not acceptable
-    assert dict_until(data, keys=['pen_name'], terminate=lambda x: x is not None, default='anonymous') == 'anonymous'
+def collect_leaves(data: Union[dict, List], keypath_pred: Optional[Callable[[List[Hashable]], bool]] = None,
+                   leaf_pred: Optional[Callable[[Any], bool]] = None) -> List[Any]:
+    leaves = list()
+    leaf_pred_comb = lambda x: leaf_pred is None or leaf_pred(x)
+    keypath_pred_comb = lambda x: keypath_pred is None or keypath_pred(x)
+
+    def _traverse(_data, keypath=None):
+        keypath = keypath or []
+        if isinstance(_data, dict):
+            return {k: _traverse(v, keypath + [k]) for k, v in _data.items()}
+        elif isinstance(_data, list):
+            return [_traverse(elem, keypath) for elem in _data]
+        else:
+            # no container, just values (str, int, float, null, obj etc.)
+            if keypath_pred_comb(keypath) and leaf_pred_comb(_data):
+                leaves.append(_data)
+
+            return _data
+
+    _traverse(data)
+    return leaves
+
