@@ -20,11 +20,12 @@ def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = Non
     return val
 
 
-def collect_leaves(data: Union[dict, List], keypath_pred: Optional[Callable[[List[Hashable]], bool]] = None,
+def collect_leaves(data: Union[dict, List], keypath_pred: Optional[Callable[[List[Any]], bool]] = None,
                    leaf_pred: Optional[Callable[[Any], bool]] = None) -> List[Any]:
     leaves = list()
-    leaf_pred_comb = lambda x: leaf_pred is None or leaf_pred(x)
+
     keypath_pred_comb = lambda x: keypath_pred is None or keypath_pred(x)
+    leaf_pred_comb = lambda x: leaf_pred is None or leaf_pred(x)
 
     def _traverse(_data, keypath=None):
         keypath = keypath or []
