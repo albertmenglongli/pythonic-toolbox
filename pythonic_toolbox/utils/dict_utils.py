@@ -20,7 +20,7 @@ def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = Non
     return val
 
 
-def collect_leaves(data: Union[dict, List], keypath_pred: Optional[Callable[[List[Any]], bool]] = None,
+def collect_leaves(data: Union[dict, List], keypath_pred: Optional[Callable[[List[Hashable]], bool]] = None,
                    leaf_pred: Optional[Callable[[Any], bool]] = None) -> List[Any]:
     leaves = list()
 
