@@ -49,30 +49,40 @@ def collect_leaves(data: Optional[Union[dict, List]] = None,
 
 
 def walk_leaves(data: Optional[Union[dict, List]] = None,
-                trans_fun: Optional[Callable[[Any], Any]] = None) -> Optional[Union[dict, List]]:
+                trans_fun: Optional[Callable[[Any], Any]] = None,
+                inplace=False) -> Optional[Union[dict, List]]:
     """
     :param data: data can be nested dict, list
     :param trans_fun: leaf transform function
-    :return: data
+    :param inplace: change values in place or not
+    :return: replace data with transformed leaves, will return None in transform inplace
     """
     if data is None:
         return data
     if not isinstance(data, (dict, list)):
         raise ValueError('data must be dict or list')
-    obj = deepcopy(data)
-    if trans_fun is None:
-        trans_fun = lambda x: x
 
-    def _traverse(_obj: Union[Any]):
+    if inplace is True:
+        obj = data
+    else:
+        # won't touch the original data
+        obj = deepcopy(data)
+
+    if trans_fun is None:
+        return obj if inplace is False else None
+
+    def _traverse(_obj, parent: Optional[Union[dict, list]] = None,
+                  idx: Optional[Union[int, Hashable]] = None) -> None:
+        """
+        This inner function transform leaves value inplace
+        """
         if isinstance(_obj, dict):
-            _res = {k: _traverse(v) for k, v in _obj.items()}
+            __ = {k: _traverse(v, _obj, k) for k, v in _obj.items()}
         elif isinstance(_obj, list):
-            _res = [_traverse(elem) for elem in _obj]
+            __ = [_traverse(elem, _obj, idx) for idx, elem in enumerate(_obj)]
         else:
             # no container, just values (str, int, float, None,  obj etc.)
-            _obj = trans_fun(_obj)
-            _res = _obj
-        return _res
+            parent[idx] = trans_fun(_obj)
 
-    res = _traverse(obj)
-    return res
+    _traverse(obj)
+    return obj if inplace is False else None

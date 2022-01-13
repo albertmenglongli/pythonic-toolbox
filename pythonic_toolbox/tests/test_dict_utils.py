@@ -79,6 +79,10 @@ def test_walk_leaves():
     assert walk_leaves([]) == []
     assert walk_leaves({}) == {}
 
+    assert walk_leaves(None, inplace=True) is None
+    assert walk_leaves([], inplace=True) is None
+    assert walk_leaves({}, inplace=True) is None
+
     data = {
         'k1': {
             'k1_1': 1,
@@ -96,7 +100,11 @@ def test_walk_leaves():
     }
     assert walk_leaves(data) == data
     assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x) == expected
+    assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x, inplace=True) is None
+    assert data == expected
 
     data = [{'name': 'lml', 'age': 33}, {'name': 'albert', 'age': 18}]
     expected = [{'name': 'lml', 'age': 66}, {'name': 'albert', 'age': 36}]
     assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x) == expected
+    assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x, inplace=True) is None
+    assert data == expected
