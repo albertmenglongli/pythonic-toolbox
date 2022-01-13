@@ -13,6 +13,11 @@ def test_dict_until():
 
 def test_collect_leaves():
     from pythonic_toolbox.utils.dict_utils import collect_leaves
+
+    assert collect_leaves([]) == []
+    assert collect_leaves({}) == []
+    assert collect_leaves(None) == []
+
     # a nested dict-like struct
     my_dict = {
         'node_1': {
@@ -65,3 +70,33 @@ def test_collect_leaves():
     assert collect_leaves(my_dict,
                           keypath_pred=lambda kp: len(kp) >= 2 and kp[-2] == 'node_1_3',
                           leaf_pred=lambda lf: isinstance(lf, str) and len(lf) == 2) == expected
+
+
+def test_walk_leaves():
+    from pythonic_toolbox.utils.dict_utils import walk_leaves
+
+    assert walk_leaves(None) is None
+    assert walk_leaves([]) == []
+    assert walk_leaves({}) == {}
+
+    data = {
+        'k1': {
+            'k1_1': 1,
+            'k1_2': 2,
+        },
+        'k2': 'N/A',  # stands for not available
+    }
+
+    expected = {
+        'k1': {
+            'k1_1': 2,
+            'k1_2': 4,
+        },
+        'k2': 'N/A',  # stands for not available
+    }
+    assert walk_leaves(data) == data
+    assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x) == expected
+
+    data = [{'name': 'lml', 'age': 33}, {'name': 'albert', 'age': 18}]
+    expected = [{'name': 'lml', 'age': 66}, {'name': 'albert', 'age': 36}]
+    assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x) == expected
