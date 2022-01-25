@@ -108,3 +108,66 @@ def test_walk_leaves():
     assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x) == expected
     assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x, inplace=True) is None
     assert data == expected
+
+
+def test_dict_obj():
+    from pythonic_toolbox.utils.dict_utils import DictObj
+
+    person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
+
+    person = DictObj(person_dct)
+    assert person.to_dict() == person_dct
+    assert set(person.keys()) == {'name', 'age', 'sex', 'languages'}
+    assert person.name == 'Albert'
+    assert person['name'] == 'Albert'
+    person.languages.append('Japanese')
+    assert person.languages == ['Chinese', 'English', 'Japanese']
+
+    person.height = '170'
+    assert person['height'] == '170'
+    assert 'height' in person
+    assert 'height' in person.keys()
+    del person['height']
+    assert 'height' not in person
+    assert 'height' not in person.keys()
+    person['height'] = '170cm'
+
+    person.update({'weight': '50'})
+    person.update(DictObj({'weight': '50kg'}))
+    assert person.weight == '50kg'
+
+    expected = {
+        'name': 'Albert', 'age': '34', 'sex': 'Male',
+        'languages': ['Chinese', 'English', 'Japanese'],  # appended new language
+        'height': '170cm',  # new added attribute
+        'weight': '50kg',  # new added attribute
+    }
+    assert person.to_dict() == expected
+
+    repr_expected: str = ("{'name': 'Albert', 'age': '34', 'sex': 'Male', "
+                          "'languages': ['Chinese', 'English', 'Japanese'],"
+                          " 'height': '170cm', 'weight': '50kg'}")
+    assert repr(person) == repr_expected
+
+
+def test_final_dict_obj():
+    import pytest
+    from pythonic_toolbox.utils.dict_utils import FinalDictObj
+
+    person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
+
+    fixed_person = FinalDictObj(person_dct)
+    assert fixed_person.name == 'Albert'
+
+    with pytest.raises(RuntimeError) as exec_info:
+        fixed_person.name = 'Steve'
+    expected_error_str = 'Not allowed to assign attribute name with value Steve for an initialized FinalDictObj'
+    assert exec_info.value.args[0] == expected_error_str
+
+    assert type(fixed_person.languages) == tuple
+    with pytest.raises(AttributeError) as exec_info:
+        # list values are changed into tuple to avoid being modified
+        fixed_person.languages.append('Japanese')
+    expected_error_str = "'tuple' object has no attribute 'append'"
+    assert exec_info.value.args[0] == expected_error_str
+    assert fixed_person.to_dict() == person_dct
