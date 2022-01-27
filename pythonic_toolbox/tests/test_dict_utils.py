@@ -118,6 +118,7 @@ def test_dict_obj():
     person = DictObj(person_dct)
     assert person.to_dict() == person_dct
     assert set(person.keys()) == {'name', 'age', 'sex', 'languages'}
+    assert hasattr(person, 'name') is True
     assert person.name == 'Albert'
     assert person['name'] == 'Albert'
     person.languages.append('Japanese')
@@ -127,6 +128,7 @@ def test_dict_obj():
     assert person['height'] == '170'
     assert 'height' in person
     assert 'height' in person.keys()
+    assert hasattr(person, 'height') is True
     del person['height']
     assert 'height' not in person
     assert 'height' not in person.keys()
