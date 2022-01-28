@@ -1,10 +1,7 @@
-from itertools import count
-import pytest
-
-from pythonic_toolbox.utils.list_utils import until, sort_with_custom_orders
-
-
 def test_until():
+    from itertools import count
+    from pythonic_toolbox.utils.list_utils import until
+
     counter = count(1, 2)  # generator of odd numbers: 1, 3, 5, 7 ...
     assert until([], default=3) == 3  # nothing provided, return default
     assert until(counter, lambda x: x > 10) == 11
@@ -13,6 +10,9 @@ def test_until():
 
 
 def test_sort_with_custom_orders():
+    import pytest
+    from pythonic_toolbox.utils.list_utils import sort_with_custom_orders
+
     assert sort_with_custom_orders([]) == []
     assert sort_with_custom_orders([], prefix_orders=[], suffix_orders=[]) == []
     assert sort_with_custom_orders([], prefix_orders=['master']) == []
