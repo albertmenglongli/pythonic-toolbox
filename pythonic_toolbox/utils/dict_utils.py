@@ -119,6 +119,12 @@ class DictObj(UserDict):
         else:
             self.data[key] = item
 
+    def popitem(self):
+        """
+        Override popitem from MutableMapping, make behavior popitem FILO like ordinary dict since 3.6
+        """
+        return self.data.popitem()
+
     def __getattribute__(self, item):
         if item == 'data':
             return self.__dict__['data']
@@ -194,6 +200,14 @@ class FinalDictObj(DictObj):
         if self.__is_frozen is True:
             raise RuntimeError(f'Cannot del attribute or item {key} in an initialized FinalDictObj')
         super(FinalDictObj, self).__delitem__(key)
+
+    def popitem(self):
+        """
+        Override popitem from MutableMapping, make behavior popitem FILO like ordinary dict since 3.6
+        """
+        if self.__is_frozen is True:
+            raise RuntimeError(f'Cannot popitem attribute/item in initialed FinalDictObj')
+        return super(FinalDictObj, self).popitem()
 
     def __setattr__(self, key, value):
         """DictObj that cannot change attribute"""

@@ -111,7 +111,23 @@ def test_walk_leaves():
 
 
 def test_dict_obj():
+    import pytest
     from pythonic_toolbox.utils.dict_utils import DictObj
+
+    naive_dct = {
+        'key1': 'val1',
+        'key2': 'val2',
+    }
+
+    obj = DictObj(naive_dct)
+    # same behavior like ordinary dict according to the python version (FILO for popitem for 3.6+)
+    assert obj.popitem() == ('key2', 'val2')
+    assert obj.popitem() == ('key1', 'val1')
+    with pytest.raises(KeyError) as __:
+        obj.popitem()
+    obj.key3 = 'val3'
+    assert obj.pop('key3', None) == 'val3'
+    assert obj.pop('key4', None) is None
 
     person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
 
@@ -135,6 +151,8 @@ def test_dict_obj():
     person['height'] = '170cm'
 
     person.update({'weight': '50'})
+    weight_val = person.pop('weight')
+    assert weight_val == '50'
     person.update(DictObj({'weight': '50kg'}))
     assert person.weight == '50kg'
 
@@ -165,6 +183,12 @@ def test_final_dict_obj():
         fixed_person.name = 'Steve'
     expected_error_str = 'Not allowed to assign attribute name with value Steve for an initialized FinalDictObj'
     assert exec_info.value.args[0] == expected_error_str
+
+    with pytest.raises(RuntimeError) as __:
+        fixed_person.popitem()
+
+    with pytest.raises(RuntimeError) as __:
+        fixed_person.pop('name')
 
     assert type(fixed_person.languages) == tuple
     with pytest.raises(AttributeError) as exec_info:
