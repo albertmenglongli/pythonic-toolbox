@@ -8,7 +8,7 @@ pip install pythonic-toolbox
 
 ## list_utils
 
-### list_utils.until
+### until
 
 ```python
 from itertools import count
@@ -21,7 +21,7 @@ assert until([1, 2, 3], lambda x: x > 10, default=11) == 11
 assert until(None, lambda x: x > 10, default=11) == 11
 ```
 
-### list_utils.sort_with_custom_orders
+### sort_with_custom_orders
 
 ```python
 import pytest
@@ -100,7 +100,7 @@ assert sort_with_custom_orders(persons, prefix_orders=[Menglong, Person(4, 'Anyo
 
 ## dict_utils
 
-### dict_utils.dict_until
+### dict_until
 
 ```python
 from pythonic_toolbox.utils.dict_utils import dict_until
@@ -115,7 +115,7 @@ assert dict_until(data, keys=['pen_name'], default='anonymous') is None
 assert dict_until(data, keys=['pen_name'], terminate=lambda x: x is not None, default='anonymous') == 'anonymous'
 ```
 
-### dict_utils.collect_leaves
+### collect_leaves
 
 ```python
 from pythonic_toolbox.utils.dict_utils import collect_leaves
@@ -178,7 +178,7 @@ assert collect_leaves(my_dict,
                       leaf_pred=lambda lf: isinstance(lf, str) and len(lf) == 2) == expected
 ```
 
-### dict_utils.walk_leaves
+### walk_leaves
 
 ```python
 from pythonic_toolbox.utils.dict_utils import walk_leaves
@@ -218,7 +218,7 @@ assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x,
 assert data == expected
 ```
 
-### dict_utils.DictObj
+### DictObj
 
 ```python
 import pytest
@@ -280,7 +280,7 @@ repr_expected: str = ("{'name': 'Albert', 'age': '34', 'sex': 'Male', "
 assert repr(person) == repr_expected
 ```
 
-### dict_utils.FinalDictObj
+### FinalDictObj
 
 ```python
 import pytest
