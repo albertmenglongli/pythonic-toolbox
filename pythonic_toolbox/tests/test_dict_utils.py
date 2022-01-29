@@ -139,7 +139,7 @@ def test_dict_obj():
         del obj.key5
 
     invalid_key_dct = {
-        '1abc': '1',  # '1' is a string, but not valid identifier for python, cannot be used as attribute
+        '1abc': '1',  # '1abc' is a string, but not valid identifier for python, cannot be used as attribute
     }
 
     with pytest.raises(ValueError) as __:
