@@ -120,6 +120,7 @@ def test_dict_obj():
     }
 
     obj = DictObj(naive_dct)
+    assert len(obj) == 2
     # same behavior like ordinary dict according to the python version (FILO for popitem for 3.6+)
     assert obj.popitem() == ('key2', 'val2')
     assert obj.popitem() == ('key1', 'val1')
@@ -169,6 +170,20 @@ def test_dict_obj():
                           " 'height': '170cm', 'weight': '50kg'}")
     assert repr(person) == repr_expected
 
+    # nested structure will be detected, and changed to DictObj
+    chessboard_data = {
+        'position': [
+            [{'name': 'knight'}, {'name': 'pawn'}],
+            [{'name': 'pawn'}, {'name': 'queen'}],
+        ]
+    }
+    chessboard_obj = DictObj(chessboard_data)
+    assert isinstance(chessboard_obj.position, list)
+    assert len(chessboard_obj.position) == 2
+    assert isinstance(chessboard_obj.position[0][0], DictObj)
+    assert chessboard_obj.position[0][0].name == 'knight'
+    assert chessboard_obj.position[1][1].name == 'queen'
+
 
 def test_final_dict_obj():
     import pytest
@@ -181,7 +196,7 @@ def test_final_dict_obj():
 
     with pytest.raises(RuntimeError) as exec_info:
         fixed_person.name = 'Steve'
-    expected_error_str = 'Not allowed to assign attribute name with value Steve for an initialized FinalDictObj'
+    expected_error_str = 'Cannot modify attribute/item in an already initialized FinalDictObj'
     assert exec_info.value.args[0] == expected_error_str
 
     with pytest.raises(RuntimeError) as __:
@@ -197,3 +212,17 @@ def test_final_dict_obj():
     expected_error_str = "'tuple' object has no attribute 'append'"
     assert exec_info.value.args[0] == expected_error_str
     assert fixed_person.to_dict() == person_dct
+
+    # nested structure will be detected, and changed to FinalDictObj
+    chessboard_data = {
+        'position': [
+            [{'name': 'knight'}, {'name': 'pawn'}],
+            [{'name': 'pawn'}, {'name': 'queen'}],
+        ]
+    }
+    chessboard_obj = FinalDictObj(chessboard_data)
+    assert isinstance(chessboard_obj.position, tuple)
+    assert isinstance(chessboard_obj.position[0][0], FinalDictObj)
+    assert chessboard_obj.position[1][1].name == 'queen'
+    with pytest.raises(RuntimeError) as __:
+        chessboard_obj.position[1][1].name = 'knight'

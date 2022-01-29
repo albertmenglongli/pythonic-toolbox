@@ -1,6 +1,7 @@
+import functools
 from collections import UserDict
-from typing import Any, Callable, Optional, List, Hashable, Union
 from copy import deepcopy
+from typing import Any, Callable, Optional, List, Hashable, Union
 
 
 def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = None, default=None):
@@ -90,7 +91,6 @@ def walk_leaves(data: Optional[Union[dict, List]] = None,
 
 
 class DictObj(UserDict):
-    __lst_factory = list
 
     def __init__(self, in_dict: dict):
 
@@ -100,24 +100,21 @@ class DictObj(UserDict):
             raise ValueError('Only string key dict are allowed for DictObj/FinalDictObj input dict')
 
         for key, val in in_dict.items():
-            if isinstance(val, list):
-                lst_factory = object.__getattribute__(self, f'_{self.__class__.__name__}__lst_factory')
-                in_dict[key] = lst_factory(self.__class__(x) if isinstance(x, dict) else x for x in val)
-            elif isinstance(val, dict):
-                in_dict[key] = self.__class__(val)
-            else:
-                in_dict[key] = val
+            in_dict[key] = self._create_obj_or_keep(val)
 
         super(DictObj, self).__init__(**in_dict)
 
-    def __setitem__(self, key, item):
-        if isinstance(item, list):
-            lst_factory = object.__getattribute__(self, f'_{self.__class__.__name__}__lst_factory')
-            self.data[key] = lst_factory(self.__class__(x) if isinstance(x, dict) else x for x in item)
-        elif isinstance(item, dict):
-            self.data[key] = self.__class__(item)
+    @classmethod
+    def _create_obj_or_keep(cls, data):
+        if isinstance(data, dict):
+            return cls(data)
+        elif isinstance(data, (list, tuple)):
+            return list(cls._create_obj_or_keep(x) for x in data)
         else:
-            self.data[key] = item
+            return data
+
+    def __setitem__(self, key, item):
+        self.data[key] = self._create_obj_or_keep(item)
 
     def popitem(self):
         """
@@ -140,16 +137,7 @@ class DictObj(UserDict):
             object.__setattr__(self, 'data', value)
         else:
             data = object.__getattribute__(self, 'data')
-            if isinstance(value, list):
-                lst_factory = object.__getattribute__(self, f'_{self.__class__.__name__}__lst_factory')
-                if lst_factory == tuple:
-                    print('Gotcha')
-                data[key] = lst_factory(self.__class__(x) if isinstance(x, dict) else x for x in value)
-            elif isinstance(value, dict):
-                data[key] = self.__class__(value)
-            else:
-                data[key] = value
-
+            data[key] = self._create_obj_or_keep(value)
             object.__setattr__(self, 'data', data)
 
     def __getattr__(self, item):
@@ -176,9 +164,19 @@ class DictObj(UserDict):
         return result
 
 
+def _frozen_checker(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if self._FinalDictObj__is_frozen is True:
+            raise RuntimeError(self._FinalDictObj__frozen_err_msg)
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
 class FinalDictObj(DictObj):
-    __lst_factory = tuple
     __is_frozen = False
+    __frozen_err_msg = 'Cannot modify attribute/item in an already initialized FinalDictObj'
 
     def __init__(self, in_dict: dict):
 
@@ -187,46 +185,49 @@ class FinalDictObj(DictObj):
         super(FinalDictObj, self).__init__(in_dict)
         self._freeze()
 
+    @classmethod
+    def _create_obj_or_keep(cls, data):
+        if isinstance(data, dict):
+            return cls(data)
+        elif isinstance(data, (list, tuple)):
+            return tuple(cls._create_obj_or_keep(x) for x in data)
+        else:
+            return data
+
     def _freeze(self):
         self.__is_frozen = True
 
+    @_frozen_checker
     def __setitem__(self, key, value):
         """DictObj that cannot change attribute"""
-        if self.__is_frozen is True:
-            raise RuntimeError(f'Cannot set attribute/item {key} in FinalDictObj')
         super(FinalDictObj, self).__setitem__(key, value)
 
+    @_frozen_checker
     def __delitem__(self, key):
-        if self.__is_frozen is True:
-            raise RuntimeError(f'Cannot del attribute or item {key} in an initialized FinalDictObj')
         super(FinalDictObj, self).__delitem__(key)
 
+    @_frozen_checker
     def popitem(self):
-        """
-        Override popitem from MutableMapping, make behavior popitem FILO like ordinary dict since 3.6
-        """
-        if self.__is_frozen is True:
-            raise RuntimeError(f'Cannot popitem attribute/item in initialed FinalDictObj')
         return super(FinalDictObj, self).popitem()
 
     def __setattr__(self, key, value):
         """DictObj that cannot change attribute"""
-        if key == '_FinalDictObj__is_frozen' and value is True:
-            # __is_frozen can only be assigned once
-            object.__setattr__(self, key, value)
+        if key == '_FinalDictObj__is_frozen':
+            if value is True:
+                # __is_frozen can only be assigned as True
+                object.__setattr__(self, '_FinalDictObj__is_frozen', True)
+            else:
+                raise RuntimeError('__is_frozen can only be assigned as True')
         else:
             if self.__is_frozen:
-                raise RuntimeError(
-                    f"Not allowed to assign attribute {key} with value {value} for an initialized FinalDictObj")
+                raise RuntimeError(self.__frozen_err_msg)
 
             super(FinalDictObj, self).__setattr__(key, value)
 
+    @_frozen_checker
     def __delattr__(self, item):
-        if self.__is_frozen is True:
-            raise RuntimeError(f'Cannot del attribute or item {item} in an initialized FinalDictObj')
         super(FinalDictObj, self).__delattr__(item)
 
+    @_frozen_checker
     def update(self, *args, **kwargs):
-        if self.__is_frozen is True:
-            raise RuntimeError(f'Update not allowed for an initialized FinalDictObj')
         super(FinalDictObj, self).update(*args, **kwargs)
