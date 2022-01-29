@@ -96,8 +96,10 @@ class DictObj(UserDict):
 
         in_dict = deepcopy(in_dict)
 
-        if any(map(lambda key: not isinstance(key, str), in_dict.keys())):
-            raise ValueError('Only string key dict are allowed for DictObj/FinalDictObj input dict')
+        if any(map(lambda key: not isinstance(key, str) or (isinstance(key, str) and not key.isidentifier()),
+                   in_dict.keys())):
+            raise ValueError('input dict for DictObj/FinalDictObj must have only string keys,'
+                             ' and keys must be valid identifiers')
 
         for key, val in in_dict.items():
             in_dict[key] = self._create_obj_or_keep(val)
@@ -150,7 +152,10 @@ class DictObj(UserDict):
             return res
 
     def __delattr__(self, item):
-        del self[item]
+        try:
+            del self[item]
+        except KeyError as e:
+            raise AttributeError
 
     def to_dict(self):
         result = {}

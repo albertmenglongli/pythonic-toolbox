@@ -239,6 +239,21 @@ with pytest.raises(KeyError) as __:
 obj.key3 = 'val3'
 assert obj.pop('key3', None) == 'val3'
 assert obj.pop('key4', None) is None
+obj.key5 = 'val5'
+del obj.key5
+assert obj.pop('key5', None) is None
+
+with pytest.raises(KeyError) as __:
+    obj.pop('key5')
+with pytest.raises(AttributeError) as __:
+    del obj.key5
+
+invalid_key_dct = {
+    '1abc': '1',  # '1' is a string, but not valid identifier for python, cannot be used as attribute
+}
+
+with pytest.raises(ValueError) as __:
+    __ = DictObj(invalid_key_dct)
 
 person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
 
@@ -280,7 +295,7 @@ repr_expected: str = ("{'name': 'Albert', 'age': '34', 'sex': 'Male', "
                       " 'height': '170cm', 'weight': '50kg'}")
 assert repr(person) == repr_expected
 
-# nested structure will be detected, and changed to DictObj
+# nested structure will be detected, and be changed to DictObj
 chessboard_data = {
     'position': [
         [{'name': 'knight'}, {'name': 'pawn'}],
