@@ -1,6 +1,6 @@
 # Pythonic toolbox
 
- A python toolbox with multi useful utils, functions, decorators in pythonic way.
+A python toolbox with multi useful utils, functions, decorators in pythonic way.
 
 ```
 pip install pythonic-toolbox 
@@ -64,6 +64,7 @@ with pytest.raises(ValueError) as exec_info:
     sort_with_custom_orders([1, 2, 3], prefix_orders=[1, 1])
 assert exec_info.value.args[0] == 'prefix_orders contains duplicated values'
 
+
 class Person:
     def __init__(self, id, name, age):
         self.id = id
@@ -85,6 +86,7 @@ class Person:
     def __repr__(self):
         return str(self)
 
+
 Albert = Person(1, 'Albert', 28)
 Alice = Person(2, 'Alice', 26)
 Menglong = Person(3, 'Menglong', 33)
@@ -104,6 +106,7 @@ assert sort_with_custom_orders(persons, prefix_orders=[Menglong, Person(4, 'Anyo
 
 ```python
 from pythonic_toolbox.utils.dict_utils import dict_until
+
 data = {'full_name': 'Albert Lee', 'pen_name': None}
 assert dict_until(data, keys=['name', 'full_name']) == 'Albert Lee'
 assert dict_until(data, keys=['full_name', 'name']) == 'Albert Lee'
@@ -355,13 +358,51 @@ with pytest.raises(RuntimeError) as __:
     chessboard_obj.position[1][1].name = 'knight'
 ```
 
-# Decorators
+## context_utils
 
-## ignore_unexpected_kwargs
+### SkipContextManager
+
+```python
+from pythonic_toolbox.utils.context_utils import SkipContextManager
+import itertools
+
+count_iterator = itertools.count(start=0, step=1)
+
+import pytest
+
+flg_skip = True
+with SkipContextManager(skip=flg_skip):
+    # if skip = True, all codes inside the context will be skipped(not executed)
+    next(count_iterator)  # this will not be executed
+    assert sum([1, 1]) == 3
+    raise Exception('Codes will not be executed')
+
+assert next(count_iterator) == 0  # check previous context is skipped
+
+flg_skip = False
+with SkipContextManager(skip=flg_skip):
+    # codes will be executed as normal, if skip = False
+    next(count_iterator)  # generate value 1
+    assert sum([1, 1]) == 2
+
+assert next(count_iterator) == 2  # check previous context is executed
+
+with pytest.raises(Exception) as exec_info:
+    with SkipContextManager(skip=False):
+        # if skip = False, this SkipContextManager is transparent,
+        # internal exception will be detected as normal
+        raise Exception('MyError')
+assert exec_info.value.args[0] == 'MyError'
+```
+
+## Decorators
+
+### ignore_unexpected_kwargs
 
 ```python
 import pytest
 from pythonic_toolbox.decorators.common import ignore_unexpected_kwargs
+
 
 # Following functions are named under Metasyntactic Variables, like:
 # foobar, foo, bar, baz, qux, quux, quuz, corge,
@@ -369,6 +410,7 @@ from pythonic_toolbox.decorators.common import ignore_unexpected_kwargs
 
 def foo(a, b=0, c=3):
     return a, b, c
+
 
 dct = {'a': 1, 'b': 2, 'd': 4}
 with pytest.raises(TypeError) as __:
@@ -380,9 +422,11 @@ assert wrapped_foo(**dct) == (1, 2, 3)
 assert wrapped_foo(0, 0, 0) == (0, 0, 0)
 assert wrapped_foo(a=1, b=2, c=3) == (1, 2, 3)
 
+
 @ignore_unexpected_kwargs
 def bar(*args: int):
     return sum(args)
+
 
 # should not change original behavior
 assert bar(1, 2, 3) == 6
@@ -390,10 +434,12 @@ assert bar(1, 2, 3, unexpected='Gotcha') == 6
 nums = [1, 2, 3]
 assert bar(*nums, unexpected='Gotcha') == 6
 
+
 @ignore_unexpected_kwargs
 def qux(a, b, **kwargs):
     # function with Parameter.VAR_KEYWORD Aka **kwargs
     return a, b, kwargs.get('c', 3), kwargs.get('d', 4)
+
 
 assert qux(**{'a': 1, 'b': 2, 'd': 4, 'e': 5}) == (1, 2, 3, 4)
 
@@ -405,6 +451,7 @@ class Person:
         self.age = age
         self.sex = sex
 
+
 params = {
     'name': 'albert',
     'age': 34,
@@ -414,4 +461,38 @@ params = {
 __ = Person(**params)
 __ = Person('albert', 35, 'male', height='170cm')
 
+```
+
+### retry
+
+```python
+import pytest
+import itertools
+
+from pythonic_toolbox.decorators.common import retry
+
+
+@retry(2, delay=0.1)
+def func_fail_twice(count_iterator):
+    if next(count_iterator) <= 1:
+        raise Exception('Fail when called first, second time')
+
+
+count_iterator = itertools.count(start=0, step=1)
+func_fail_twice(count_iterator)
+assert next(count_iterator) == 3
+
+
+@retry(2, delay=0.1)
+def func_fail_three_times(count_iterator):
+    if next(count_iterator) <= 2:  # 0, 1,2
+        raise Exception('Fail when called first, second, third time')
+
+
+count_iterator = itertools.count(start=0, step=1)
+
+with pytest.raises(Exception) as exec_info:
+    func_fail_three_times(count_iterator)
+assert next(count_iterator) == 3
+assert exec_info.value.args[0] == 'Fail when called first, second, third time'
 ```

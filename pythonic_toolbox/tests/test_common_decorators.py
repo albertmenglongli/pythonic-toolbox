@@ -51,3 +51,31 @@ def test_ignore_unexpected_kwargs():
     }
     __ = Person(**params)
     __ = Person('albert', 35, 'male', height='170cm')
+
+
+def test_retry():
+    import pytest
+    import itertools
+
+    from pythonic_toolbox.decorators.common import retry
+
+    @retry(2, delay=0.1)
+    def func_fail_twice(count_iterator):
+        if next(count_iterator) <= 1:
+            raise Exception('Fail when called first, second time')
+
+    count_iterator = itertools.count(start=0, step=1)
+    func_fail_twice(count_iterator)
+    assert next(count_iterator) == 3
+
+    @retry(2, delay=0.1)
+    def func_fail_three_times(count_iterator):
+        if next(count_iterator) <= 2:  # 0, 1,2
+            raise Exception('Fail when called first, second, third time')
+
+    count_iterator = itertools.count(start=0, step=1)
+
+    with pytest.raises(Exception) as exec_info:
+        func_fail_three_times(count_iterator)
+    assert next(count_iterator) == 3
+    assert exec_info.value.args[0] == 'Fail when called first, second, third time'

@@ -1,7 +1,9 @@
 import functools
 import inspect
+import time
+from functools import lru_cache, wraps
 from inspect import Parameter
-from typing import Callable, Any
+from typing import Any, Callable, Optional, Set, List, Union
 
 
 def ignore_unexpected_kwargs(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -27,3 +29,36 @@ def ignore_unexpected_kwargs(func: Callable[..., Any]) -> Callable[..., Any]:
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def retry(tries: int, delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., Any]:
+    if factor <= 1:
+        raise ValueError("back off factor must be greater than 1")
+
+    if not (isinstance(tries, int) and tries > 0):
+        raise ValueError("tries must be positive integer")
+
+    if delay <= 0:
+        raise ValueError("delay must be greater than 0")
+
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            _tries, _delay = tries, delay
+            _tries += 1  # ensure we call func at least once
+            while _tries > 0:
+                try:
+                    ret = func(*args, **kwargs)
+                    return ret
+                except Exception as e:
+                    _tries -= 1
+                    # retried enough and still fail? raise original exception
+                    if _tries == 0:
+                        raise e
+                    time.sleep(_delay)
+                    # wait longer after each failure
+                    _delay *= factor
+
+        return wrapper
+
+    return decorator
