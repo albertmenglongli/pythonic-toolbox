@@ -1,12 +1,14 @@
 import json
 from collections import defaultdict
-from typing import Any, List, Iterable, Union, Optional, Callable
+from typing import List, Iterable, Union, Optional, Callable, TypeVar
+
+T = TypeVar("T")
 
 
-def sort_with_custom_orders(values: List[Any],
-                            prefix_orders: Optional[List[Any]] = None,
-                            suffix_orders: Optional[List[Any]] = None,
-                            key=None, hash_fun=None, reverse=False) -> List[Any]:
+def sort_with_custom_orders(values: List[T],
+                            prefix_orders: Optional[List[T]] = None,
+                            suffix_orders: Optional[List[T]] = None,
+                            key=None, hash_fun=None, reverse=False) -> List[T]:
     class Empty:
         pass
 
@@ -86,9 +88,9 @@ def sort_with_custom_orders(values: List[Any],
     return sorted_values
 
 
-def until(values: Optional[Union[List[Any], Iterable]],
-          terminate: Optional[Callable[[Any], bool]] = None,
-          default=None) -> Any:
+def until(values: Optional[Union[List[T], Iterable]],
+          terminate: Optional[Callable[[T], bool]] = None,
+          default=None) -> T:
     class Empty:
         pass
 

@@ -1,12 +1,13 @@
 import functools
 import inspect
 import time
-from functools import lru_cache, wraps
 from inspect import Parameter
-from typing import Any, Callable, Optional, Set, List, Union
+from typing import Callable, Union, TypeVar
+
+T = TypeVar("T")
 
 
-def ignore_unexpected_kwargs(func: Callable[..., Any]) -> Callable[..., Any]:
+def ignore_unexpected_kwargs(func: Callable[..., T]) -> Callable[..., T]:
     def filter_kwargs(kwargs: dict) -> dict:
         sig = inspect.signature(func)
         # Parameter.VAR_KEYWORD - a dict of keyword arguments that aren't bound to any other
@@ -24,14 +25,14 @@ def ignore_unexpected_kwargs(func: Callable[..., Any]) -> Callable[..., Any]:
         return res_kwargs
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Any:
+    def wrapper(*args, **kwargs) -> T:
         kwargs = filter_kwargs(kwargs)
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def retry(tries: int, delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., Any]:
+def retry(tries: int, delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., T]:
     if factor <= 1:
         raise ValueError("back off factor must be greater than 1")
 
@@ -41,7 +42,7 @@ def retry(tries: int, delay: Union[int, float] = 1, factor: Union[int, float] = 
     if delay <= 0:
         raise ValueError("delay must be greater than 0")
 
-    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             _tries, _delay = tries, delay

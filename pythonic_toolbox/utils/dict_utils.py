@@ -1,10 +1,12 @@
 import functools
 from collections import UserDict
 from copy import deepcopy
-from typing import Any, Callable, Optional, List, Hashable, Union
+from typing import Any, Callable, Optional, List, Hashable, Union, TypeVar
+
+T = TypeVar("T")
 
 
-def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = None, default=None):
+def dict_until(obj, keys: list, terminate: Optional[Callable[[T], bool]] = None, default=None) -> T:
     class Empty:
         pass
 
@@ -25,7 +27,7 @@ def dict_until(obj, keys: list, terminate: Optional[Callable[[Any], bool]] = Non
 
 def collect_leaves(data: Optional[Union[dict, List]] = None,
                    keypath_pred: Optional[Callable[[List[Hashable]], bool]] = None,
-                   leaf_pred: Optional[Callable[[Any], bool]] = None) -> List[Any]:
+                   leaf_pred: Optional[Callable[[T], bool]] = None) -> List[T]:
     leaves = list()
     if not data:
         return leaves
