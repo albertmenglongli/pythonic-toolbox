@@ -1,4 +1,4 @@
-def test_skip_context_manager():
+def test_SkipContext():
     from pythonic_toolbox.utils.context_utils import SkipContext
     import itertools
 

@@ -1,5 +1,6 @@
 def test_dict_until():
     from pythonic_toolbox.utils.dict_utils import dict_until
+
     data = {'full_name': 'Albert Lee', 'pen_name': None}
     assert dict_until(data, keys=['name', 'full_name']) == 'Albert Lee'
     assert dict_until(data, keys=['full_name', 'name']) == 'Albert Lee'
@@ -13,10 +14,6 @@ def test_dict_until():
 
 def test_collect_leaves():
     from pythonic_toolbox.utils.dict_utils import collect_leaves
-
-    assert collect_leaves([]) == []
-    assert collect_leaves({}) == []
-    assert collect_leaves(None) == []
 
     # a nested dict-like struct
     my_dict = {
@@ -71,17 +68,14 @@ def test_collect_leaves():
                           keypath_pred=lambda kp: len(kp) >= 2 and kp[-2] == 'node_1_3',
                           leaf_pred=lambda lf: isinstance(lf, str) and len(lf) == 2) == expected
 
+    # edge cases
+    assert collect_leaves([]) == []
+    assert collect_leaves({}) == []
+    assert collect_leaves(None) == []
+
 
 def test_walk_leaves():
     from pythonic_toolbox.utils.dict_utils import walk_leaves
-
-    assert walk_leaves(None) is None
-    assert walk_leaves([]) == []
-    assert walk_leaves({}) == {}
-
-    assert walk_leaves(None, inplace=True) is None
-    assert walk_leaves([], inplace=True) is None
-    assert walk_leaves({}, inplace=True) is None
 
     data = {
         'k1': {
@@ -98,8 +92,10 @@ def test_walk_leaves():
         },
         'k2': 'N/A',  # stands for not available
     }
-    assert walk_leaves(data) == data
+    assert walk_leaves(data) == data  # no transform function provided, just a deepcopy
     assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x) == expected
+
+    # if inplace is set True, will change data inplace, return nothing
     assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x, inplace=True) is None
     assert data == expected
 
@@ -109,8 +105,16 @@ def test_walk_leaves():
     assert walk_leaves(data, trans_fun=lambda x: x * 2 if isinstance(x, int) else x, inplace=True) is None
     assert data == expected
 
+    # edge cases
+    assert walk_leaves(None) is None
+    assert walk_leaves([]) == []
+    assert walk_leaves({}) == {}
+    assert walk_leaves(None, inplace=True) is None
+    assert walk_leaves([], inplace=True) is None
+    assert walk_leaves({}, inplace=True) is None
 
-def test_dict_obj():
+
+def test_DictObj():
     import pytest
     from pythonic_toolbox.utils.dict_utils import DictObj
 
@@ -120,12 +124,17 @@ def test_dict_obj():
     }
 
     obj = DictObj(naive_dct)
+
+    # test basic functional methods like dict
     assert len(obj) == 2
     # same behavior like ordinary dict according to the python version (FILO for popitem for 3.6+)
     assert obj.popitem() == ('key2', 'val2')
     assert obj.popitem() == ('key1', 'val1')
     with pytest.raises(KeyError) as __:
         obj.popitem()
+
+    # a key can be treated like an attribute
+    # an attribute can be treated like a key
     obj.key3 = 'val3'
     assert obj.pop('key3', None) == 'val3'
     assert obj.pop('key4', None) is None
@@ -137,13 +146,6 @@ def test_dict_obj():
         obj.pop('key5')
     with pytest.raises(AttributeError) as __:
         del obj.key5
-
-    invalid_key_dct = {
-        '1abc': '1',  # '1abc' is a string, but not valid identifier for python, cannot be used as attribute
-    }
-
-    with pytest.raises(ValueError) as __:
-        __ = DictObj(invalid_key_dct)
 
     person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
 
@@ -199,8 +201,17 @@ def test_dict_obj():
     assert chessboard_obj.position[0][0].name == 'knight'
     assert chessboard_obj.position[1][1].name == 'queen'
 
+    # params validation
+    invalid_key_dct = {
+        '1abc': '1',  # '1abc' is a string, but not valid identifier for python, cannot be used as attribute
+    }
 
-def test_final_dict_obj():
+    # test when dict's key cannot be used as an identifier
+    with pytest.raises(ValueError) as __:
+        __ = DictObj(invalid_key_dct)
+
+
+def test_FinalDictObj():
     import pytest
     from pythonic_toolbox.utils.dict_utils import FinalDictObj
 
@@ -209,6 +220,7 @@ def test_final_dict_obj():
     fixed_person = FinalDictObj(person_dct)
     assert fixed_person.name == 'Albert'
 
+    # FINAL means once initialized, you cannot change the key/attribute anymore
     with pytest.raises(RuntimeError) as exec_info:
         fixed_person.name = 'Steve'
     expected_error_str = 'Cannot modify attribute/item in an already initialized FinalDictObj'

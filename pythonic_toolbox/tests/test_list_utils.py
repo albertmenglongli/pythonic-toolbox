@@ -2,10 +2,14 @@ def test_until():
     from itertools import count
     from pythonic_toolbox.utils.list_utils import until
 
+    # basic usage
     counter = count(1, 2)  # generator of odd numbers: 1, 3, 5, 7 ...
-    assert until([], default=3) == 3  # nothing provided, return default
     assert until(counter, lambda x: x > 10) == 11
+
     assert until([1, 2, 3], lambda x: x > 10, default=11) == 11
+
+    # edge cases
+    assert until([], default=3) == 3  # nothing provided, return default
     assert until(None, lambda x: x > 10, default=11) == 11
 
 
@@ -13,10 +17,7 @@ def test_sort_with_custom_orders():
     import pytest
     from pythonic_toolbox.utils.list_utils import sort_with_custom_orders
 
-    assert sort_with_custom_orders([]) == []
-    assert sort_with_custom_orders([], prefix_orders=[], suffix_orders=[]) == []
-    assert sort_with_custom_orders([], prefix_orders=['master']) == []
-
+    # basic usage
     values = ['branch2', 'branch1', 'branch3', 'master', 'release']
     expected = ['master', 'release', 'branch1', 'branch2', 'branch3']
     assert sort_with_custom_orders(values, prefix_orders=['master', 'release']) == expected
@@ -30,7 +31,11 @@ def test_sort_with_custom_orders():
     expected = [9, 2, 3, 1]
     assert sort_with_custom_orders(values, prefix_orders=[9], suffix_orders=[1]) == expected
 
-    # testing for unshashable values
+    assert sort_with_custom_orders([]) == []
+    assert sort_with_custom_orders([], prefix_orders=[], suffix_orders=[]) == []
+    assert sort_with_custom_orders([], prefix_orders=['master']) == []
+
+    # testing for unhashable values
     values = [[2, 2], [1, 1], [3, 3], [6, 0]]
     expected = [[3, 3], [1, 1], [2, 2], [6, 0]]
     assert sort_with_custom_orders(values, prefix_orders=[[3, 3]], key=lambda x: sum(x)) == expected

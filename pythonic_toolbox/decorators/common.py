@@ -1,8 +1,12 @@
+import asyncio
 import functools
 import inspect
 import time
+from contextlib import contextmanager
 from inspect import Parameter
-from typing import Callable, Union, TypeVar
+from typing import Callable, Union, TypeVar, Any
+
+from pythonic_toolbox.decorators.decorator_utils import decorate_auto_use_params, decorate_sync_async
 
 T = TypeVar("T")
 
@@ -32,34 +36,56 @@ def ignore_unexpected_kwargs(func: Callable[..., T]) -> Callable[..., T]:
     return wrapper
 
 
-def retry(tries: int, delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., T]:
-    if factor <= 1:
-        raise ValueError("back off factor must be greater than 1")
+@decorate_auto_use_params
+def duration(func: Callable[..., T], time_threshold: float = 1) -> Callable[..., Any]:
+    @contextmanager
+    def decorating_context(func: Callable[..., T], *args, **kwargs):
+        start = time.perf_counter()
+        try:
+            yield args, kwargs
+        except Exception as e:
+            raise e
+        finally:
+            if time_threshold <= 0:
+                return
+            end = time.perf_counter()
+            total = end - start
+            if total >= time_threshold:
+                print(f'{func.__name__} took {total:.2} second(s) args {args}, kwargs {kwargs}')
 
-    if not (isinstance(tries, int) and tries > 0):
-        raise ValueError("tries must be positive integer")
+    return decorate_sync_async(decorating_context, func)
 
-    if delay <= 0:
-        raise ValueError("delay must be greater than 0")
 
-    def decorator(func: Callable[..., T]) -> Callable[..., T]:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            _tries, _delay = tries, delay
-            _tries += 1  # ensure we call func at least once
+@decorate_auto_use_params
+def retry(func: Callable[..., T], tries: int = 1, delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., T]:
+    _tries, _delay = tries, delay
+    _tries += 1  # ensure we call func at least once
+
+    if asyncio.iscoroutinefunction(func):
+        async def decorated(*args, **kwargs):
+            nonlocal _tries, _delay
             while _tries > 0:
                 try:
-                    ret = func(*args, **kwargs)
-                    return ret
+                    return await func(*args, **kwargs)
                 except Exception as e:
                     _tries -= 1
-                    # retried enough and still fail? raise original exception
                     if _tries == 0:
                         raise e
                     time.sleep(_delay)
-                    # wait longer after each failure
                     _delay *= factor
 
-        return wrapper
+    else:
+        def decorated(*args, **kwargs):
+            nonlocal _tries, _delay
+            while _tries > 0:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    _tries -= 1
+                    if _tries == 0:
+                        raise e
+                    time.sleep(_delay)
+                    _delay *= factor
+            return func(*args, **kwargs)
 
-    return decorator
+    return functools.wraps(func)(decorated)

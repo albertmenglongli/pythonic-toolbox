@@ -55,27 +55,69 @@ def test_ignore_unexpected_kwargs():
 
 def test_retry():
     import pytest
-    import itertools
-
     from pythonic_toolbox.decorators.common import retry
 
-    @retry(2, delay=0.1)
-    def func_fail_twice(count_iterator):
-        if next(count_iterator) <= 1:
+    # use decorator without any arguments, using retry default params
+    @retry
+    def func_fail_first_time():
+        self = func_fail_first_time
+        if not hasattr(self, 'call_times'):
+            # set attribute call_times for function, to count call times
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times == 1:
+            raise Exception('Fail when first called')
+        return 'ok'
+
+    assert func_fail_first_time() == 'ok'
+    assert func_fail_first_time.call_times == 2
+
+    @retry(2, delay=0.1)  # use decorator with customized params
+    def func_fail_twice():
+        self = func_fail_twice
+        if not hasattr(self, 'call_times'):
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times <= 2:
             raise Exception('Fail when called first, second time')
+        return 'ok'
 
-    count_iterator = itertools.count(start=0, step=1)
-    func_fail_twice(count_iterator)
-    assert next(count_iterator) == 3
+    assert func_fail_twice() == 'ok'
+    assert func_fail_twice.call_times == 3
 
     @retry(2, delay=0.1)
-    def func_fail_three_times(count_iterator):
-        if next(count_iterator) <= 2:  # 0, 1,2
+    def func_fail_three_times():
+        self = func_fail_three_times
+        if not hasattr(self, 'call_times'):
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times <= 3:  # 1, 2, 3
             raise Exception('Fail when called first, second, third time')
-
-    count_iterator = itertools.count(start=0, step=1)
+        return 'ok'
 
     with pytest.raises(Exception) as exec_info:
-        func_fail_three_times(count_iterator)
-    assert next(count_iterator) == 3
+        func_fail_three_times()
+    assert func_fail_three_times.call_times == 3
     assert exec_info.value.args[0] == 'Fail when called first, second, third time'
+
+    import asyncio
+
+    @retry(delay=0.1)
+    async def async_func_fail_first_time():
+        self = async_func_fail_first_time
+        if not hasattr(self, 'call_times'):
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times == 1:
+            raise Exception('Fail when first called')
+        return 'ok'
+
+    async def async_main():
+        assert await async_func_fail_first_time() == 'ok'
+        assert async_func_fail_first_time.call_times == 2
+
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(async_main())
+    finally:
+        loop.close()
