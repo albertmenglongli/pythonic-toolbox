@@ -1,7 +1,7 @@
 import sys
 
 
-class SkipContextManager:
+class SkipContext:
     class SkipContentException(Exception):
         pass
 
