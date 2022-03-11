@@ -1,8 +1,8 @@
 # Pythonic toolbox
 
-This README.md is Auto-Generated from testing files by generate_readme_markdown.py .
+This **README.md** is **Auto-Generated** from testing files by **generate_readme_markdown.py** .
  
-DO NOT EDIT DIRECTLY!
+**DO NOT EDIT DIRECTLY!**
 
 ## Installation
 
