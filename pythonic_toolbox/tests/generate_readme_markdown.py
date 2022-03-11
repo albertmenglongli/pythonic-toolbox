@@ -26,13 +26,13 @@ def get_functions_in_pkg(pkg):
 
 title = ("""# Pythonic toolbox
 
+A python toolbox with multi useful utils, functions, decorators in pythonic way.
+
 This **README.md** is **Auto-Generated** from testing files by **generate_readme_markdown.py** .
  
 **DO NOT EDIT DIRECTLY!**
 
 ## Installation
-
-A python toolbox with multi useful utils, functions, decorators in pythonic way.
 
 ```bash
 pip install pythonic-toolbox 
