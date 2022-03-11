@@ -19,12 +19,12 @@ pip install pythonic-toolbox
 #### SkipContext
 
 ```python3
-from pythonic_toolbox.utils.context_utils import SkipContext
 import itertools
+import pytest
+
+from pythonic_toolbox.utils.context_utils import SkipContext
 
 count_iterator = itertools.count(start=0, step=1)
-
-import pytest
 
 flg_skip = True
 with SkipContext(skip=flg_skip):
@@ -58,6 +58,7 @@ assert exec_info.value.args[0] == 'MyError'
 
 ```python3
 import pytest
+
 from pythonic_toolbox.decorators.common import ignore_unexpected_kwargs
 
 # Following functions are named under Metasyntactic Variables, like:
@@ -116,6 +117,7 @@ __ = Person('albert', 35, 'male', height='170cm')
 
 ```python3
 import pytest
+
 from pythonic_toolbox.decorators.common import retry
 
 # use decorator without any arguments, using retry default params
@@ -191,6 +193,7 @@ finally:
 
 ```python3
 import pytest
+
 from pythonic_toolbox.utils.dict_utils import DictObj
 
 naive_dct = {
@@ -291,6 +294,7 @@ with pytest.raises(ValueError) as __:
 
 ```python3
 import pytest
+
 from pythonic_toolbox.utils.dict_utils import FinalDictObj
 
 person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}

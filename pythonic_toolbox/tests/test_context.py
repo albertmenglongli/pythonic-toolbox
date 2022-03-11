@@ -1,10 +1,10 @@
 def test_SkipContext():
-    from pythonic_toolbox.utils.context_utils import SkipContext
     import itertools
+    import pytest
+
+    from pythonic_toolbox.utils.context_utils import SkipContext
 
     count_iterator = itertools.count(start=0, step=1)
-
-    import pytest
 
     flg_skip = True
     with SkipContext(skip=flg_skip):

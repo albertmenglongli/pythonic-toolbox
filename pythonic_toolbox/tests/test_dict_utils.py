@@ -116,6 +116,7 @@ def test_walk_leaves():
 
 def test_DictObj():
     import pytest
+
     from pythonic_toolbox.utils.dict_utils import DictObj
 
     naive_dct = {
@@ -213,6 +214,7 @@ def test_DictObj():
 
 def test_FinalDictObj():
     import pytest
+
     from pythonic_toolbox.utils.dict_utils import FinalDictObj
 
     person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
