@@ -3,13 +3,13 @@
 A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.9 .
 
 This **README.md** is **Auto-Generated** from testing files by **generate_readme_markdown.py** .
- 
+
 **DO NOT EDIT DIRECTLY!**
 
 ## Installation
 
 ```bash
-pip install pythonic-toolbox 
+pip install pythonic-toolbox
 ```
 
 # How to use
@@ -314,7 +314,7 @@ with pytest.raises(RuntimeError) as __:
 with pytest.raises(RuntimeError) as __:
     fixed_person.pop('name')
 
-assert type(fixed_person.languages) == tuple
+assert isinstance(fixed_person.languages, tuple)
 with pytest.raises(AttributeError) as exec_info:
     # list values are changed into tuple to avoid being modified
     fixed_person.languages.append('Japanese')
@@ -470,8 +470,8 @@ assert walk_leaves({}, inplace=True) is None
 ```python3
 from pythonic_toolbox.utils.functional_utils import filter_multi
 
-is_even = lambda x: x % 2 == 0
-is_divisible_by_5 = lambda x: x % 5 == 0
+def is_even(x): return x % 2 == 0
+def is_divisible_by_5(x): return x % 5 == 0
 
 # select numbers which are divisible by 2 and 5
 assert filter_multi([is_even, is_divisible_by_5], range(1, 30)) == [10, 20]

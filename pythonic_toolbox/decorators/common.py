@@ -57,7 +57,8 @@ def duration(func: Callable[..., T], time_threshold: float = 1) -> Callable[...,
 
 
 @decorate_auto_use_params
-def retry(func: Callable[..., T], tries: int = 1, delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., T]:
+def retry(func: Callable[..., T], tries: int = 1,
+          delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., T]:
     _tries, _delay = tries, delay
     _tries += 1  # ensure we call func at least once
 

@@ -26,8 +26,8 @@ def sort_with_custom_orders(values: List[T],
     if not isinstance(suffix_orders, list):
         raise ValueError('suffix_orders should be a list if provided')
 
-    first = lambda seq: next(iter(seq), UNSIGNED)
-    identity = lambda x: x
+    def first(seq): return next(iter(seq), UNSIGNED)
+    def identity(x): return x
     default_hash_fun = json.dumps
 
     if key is None:
@@ -100,7 +100,7 @@ def until(values: Optional[Union[List[T], Iterable]],
         return default
 
     if terminate is None:
-        terminate = lambda v: v is not UNSIGNED
+        def terminate(v): return v is not UNSIGNED
 
     if isinstance(values, (list, Iterable)):
         for i in values:

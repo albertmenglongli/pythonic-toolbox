@@ -234,7 +234,7 @@ def test_FinalDictObj():
     with pytest.raises(RuntimeError) as __:
         fixed_person.pop('name')
 
-    assert type(fixed_person.languages) == tuple
+    assert isinstance(fixed_person.languages, tuple)
     with pytest.raises(AttributeError) as exec_info:
         # list values are changed into tuple to avoid being modified
         fixed_person.languages.append('Japanese')

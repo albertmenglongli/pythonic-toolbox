@@ -1,8 +1,8 @@
 def test_filter_multi():
     from pythonic_toolbox.utils.functional_utils import filter_multi
 
-    is_even = lambda x: x % 2 == 0
-    is_divisible_by_5 = lambda x: x % 5 == 0
+    def is_even(x): return x % 2 == 0
+    def is_divisible_by_5(x): return x % 5 == 0
 
     # select numbers which are divisible by 2 and 5
     assert filter_multi([is_even, is_divisible_by_5], range(1, 30)) == [10, 20]

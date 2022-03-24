@@ -13,7 +13,7 @@ def dict_until(obj, keys: list, terminate: Optional[Callable[[T], bool]] = None,
     UNSIGNED = Empty()
 
     if terminate is None:
-        terminate = lambda v: v is not UNSIGNED
+        def terminate(v): return v is not UNSIGNED
 
     from pythonic_toolbox.utils.list_utils import until
 
@@ -32,8 +32,8 @@ def collect_leaves(data: Optional[Union[dict, List]] = None,
     if not data:
         return leaves
 
-    keypath_pred_comb = lambda x: keypath_pred is None or keypath_pred(x)
-    leaf_pred_comb = lambda x: leaf_pred is None or leaf_pred(x)
+    def keypath_pred_comb(x): return keypath_pred is None or keypath_pred(x)
+    def leaf_pred_comb(x): return leaf_pred is None or leaf_pred(x)
 
     def _traverse(_data, keypath=None):
         keypath = keypath or []
