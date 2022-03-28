@@ -23,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.1.15',
+    version=open('VERSION').read().strip(),
 
     description='a toolbox with pythonic utils, tools',
     long_description=long_description,
@@ -74,7 +74,7 @@ setup(
 
     install_requires=[
         'pytest',
-        'funcy>=1.17',
+        'funcy>=1.16',
     ]
 
 )
