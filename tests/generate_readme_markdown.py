@@ -5,7 +5,7 @@ from collections import deque
 from inspect import getmembers, isfunction, getsource
 
 DIR_PATH = Path(__file__).resolve().parent
-README_PATH = DIR_PATH.parent.parent / 'README.md'
+README_PATH = DIR_PATH.parent / 'README.md'
 
 SPACE = ' '
 THREE_BACKTICKS = '```'
