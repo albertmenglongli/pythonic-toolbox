@@ -74,6 +74,83 @@ def test_collect_leaves():
     assert collect_leaves(None) == []
 
 
+def test_select_list_of_dicts():
+    from pythonic_toolbox.utils.dict_utils import select_list_of_dicts
+
+    dict_lst = [
+        {'name': 'Tony Stark', 'sex': 'male', 'age': 49, 'alias': 'Iron Man'},
+        {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+        # another Peter Parker from multiverse
+        {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+        {'name': 'Carol Danvers', 'sex': 'female', 'alias': 'Captain Marvel'},
+        {'name': 'Natasha Romanoff', 'sex': 'female', 'age': 35, 'alias': 'Black Widow'},
+    ]
+
+    assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'female']) == [
+        {'name': 'Carol Danvers', 'sex': 'female', 'alias': 'Captain Marvel'},
+        {'name': 'Natasha Romanoff', 'sex': 'female', 'age': 35, 'alias': 'Black Widow'}]
+
+    assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'female'], keys=['name']) == [
+        {'name': 'Carol Danvers'}, {'name': 'Natasha Romanoff'}]
+
+    # unique are supported for return, default: unique=False
+    assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'male'], keys=['name', 'age']) == [
+        {'name': 'Tony Stark', 'age': 49},
+        {'name': 'Peter Parker', 'age': 16},
+        {'name': 'Peter Parker', 'age': 16},
+    ]
+
+    assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'male'], keys=['name', 'age'], unique=True) == [
+        {'name': 'Tony Stark', 'age': 49},
+        {'name': 'Peter Parker', 'age': 16}]
+
+    # dict keys are ordered along with the keys passed-in
+    assert list(select_list_of_dicts(dict_lst, keys=['name', 'age'], unique=True)[0].keys()) == ['name', 'age']
+    assert list(select_list_of_dicts(dict_lst, keys=['age', 'name'], unique=True)[0].keys()) == ['age', 'name']
+
+    # locate Captain Marvel, with default val for missing key
+    assert select_list_of_dicts(dict_lst,
+                                preds=[lambda d: d['alias'] == 'Captain Marvel'],
+                                keys=['name', 'sex', 'age', 'alias'],
+                                val_for_missing_key='Unknown')[0]['age'] == 'Unknown'
+
+    # edge cases, get the original dict
+    assert select_list_of_dicts([]) == []
+    assert select_list_of_dicts(dict_lst) == dict_lst
+
+    # new list of dicts is returned every time, leaving the original list of dicts untouched
+    black_widow = select_list_of_dicts(dict_lst, [lambda d: d['name'] == 'Natasha Romanoff'])[0]
+    black_widow['age'] += 1
+    assert black_widow['age'] == 36
+    # we don't modify the original dict data, Natasha is always 35 years old
+    assert select_list_of_dicts(dict_lst, [lambda d: d['name'] == 'Natasha Romanoff'])[0]['age'] == 35
+
+    # filter out the one without age info
+    assert len(select_list_of_dicts(dict_lst, [lambda d: 'age' in d])) == 4
+    assert len(select_list_of_dicts(dict_lst, [lambda d: 'age' in d], unique=True)) == 3
+
+
+def test_unique_list_of_dicts():
+    from pythonic_toolbox.utils.dict_utils import unique_list_of_dicts
+
+    dict_lst = [
+        {'name': 'Tony Stark', 'sex': 'male', 'age': 49, 'alias': 'Iron Man'},
+        {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+        # Peter Parkers from multiverse in same age.
+        {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+        {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+    ]
+
+    # Only one Peter Parker will be kept, for all data are exactly same.
+    assert unique_list_of_dicts(dict_lst) == [
+        {'name': 'Tony Stark', 'sex': 'male', 'age': 49, 'alias': 'Iron Man'},
+        {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+    ]
+
+    # edge cases
+    assert unique_list_of_dicts([]) == []
+
+
 def test_walk_leaves():
     from pythonic_toolbox.utils.dict_utils import walk_leaves
 

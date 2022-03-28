@@ -1,7 +1,7 @@
 import functools
 from collections import UserDict
 from copy import deepcopy
-from typing import Any, Callable, Optional, List, Hashable, Union, TypeVar
+from typing import Any, Callable, Optional, Iterator, List, Hashable, Union, TypeVar
 
 T = TypeVar("T")
 
@@ -32,8 +32,11 @@ def collect_leaves(data: Optional[Union[dict, List]] = None,
     if not data:
         return leaves
 
-    def keypath_pred_comb(x): return keypath_pred is None or keypath_pred(x)
-    def leaf_pred_comb(x): return leaf_pred is None or leaf_pred(x)
+    def keypath_pred_comb(x):
+        return keypath_pred is None or keypath_pred(x)
+
+    def leaf_pred_comb(x):
+        return leaf_pred is None or leaf_pred(x)
 
     def _traverse(_data, keypath=None):
         keypath = keypath or []
@@ -50,6 +53,46 @@ def collect_leaves(data: Optional[Union[dict, List]] = None,
 
     _traverse(data)
     return leaves
+
+
+def select_list_of_dicts(dict_lst: List[dict],
+                         preds: Optional[Iterator[Callable[[dict], bool]]] = None,
+                         keys: Optional[Hashable] = None,
+                         unique=False, val_for_missing_key=None) -> List[dict]:
+    """ Select part of the dict collections."""
+
+    from funcy import rpartial, project, all_fn
+
+    preds = preds or []
+    keys = keys or []
+
+    dict_lst = deepcopy(dict_lst)
+    res: Union[List[dict], Iterator[dict]] = dict_lst
+
+    if preds:
+        res = filter(all_fn(*preds), dict_lst)
+
+    if keys:
+        # select target keys
+        res = map(rpartial(project, keys=keys), res)
+        # re-order dict keys and fill value for missing key
+        res = [{k: dct.get(k, val_for_missing_key) for k in keys} for dct in res]
+
+    if unique is True:
+        res = unique_list_of_dicts(res)
+
+    return list(res)
+
+
+def unique_list_of_dicts(dict_list: List[dict]) -> List[dict]:
+    unique_res: List[dict] = []
+    items_tuple_set = set()
+    for d in dict_list:
+        items_tuple = tuple(d.items())
+        if items_tuple not in items_tuple_set:
+            unique_res.append(deepcopy(d))
+            items_tuple_set.add(items_tuple)
+    return unique_res
 
 
 def walk_leaves(data: Optional[Union[dict, List]] = None,
