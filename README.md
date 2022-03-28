@@ -441,7 +441,7 @@ assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'female']) == [
 assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'female'], keys=['name']) == [
     {'name': 'Carol Danvers'}, {'name': 'Natasha Romanoff'}]
 
-# unique are supported for return, default: unique=False
+# unique is supported for return list
 assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'male'], keys=['name', 'age']) == [
     {'name': 'Tony Stark', 'age': 49},
     {'name': 'Peter Parker', 'age': 16},
@@ -452,7 +452,7 @@ assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'male'], keys=['nam
     {'name': 'Tony Stark', 'age': 49},
     {'name': 'Peter Parker', 'age': 16}]
 
-# dict keys are ordered along with the keys passed-in
+# dict keys are ordered as the keys passed-in
 assert list(select_list_of_dicts(dict_lst, keys=['name', 'age'], unique=True)[0].keys()) == ['name', 'age']
 assert list(select_list_of_dicts(dict_lst, keys=['age', 'name'], unique=True)[0].keys()) == ['age', 'name']
 
@@ -466,14 +466,14 @@ assert select_list_of_dicts(dict_lst,
 assert select_list_of_dicts([]) == []
 assert select_list_of_dicts(dict_lst) == dict_lst
 
-# new list of dicts is returned every time, leaving the original list of dicts untouched
+# new list of dicts is returned, leaving the original list of dicts untouched
 black_widow = select_list_of_dicts(dict_lst, [lambda d: d['name'] == 'Natasha Romanoff'])[0]
 black_widow['age'] += 1
 assert black_widow['age'] == 36
 # we don't modify the original dict data, Natasha is always 35 years old
 assert select_list_of_dicts(dict_lst, [lambda d: d['name'] == 'Natasha Romanoff'])[0]['age'] == 35
 
-# filter out the one without age info
+# filter the ones with age info
 assert len(select_list_of_dicts(dict_lst, [lambda d: 'age' in d])) == 4
 assert len(select_list_of_dicts(dict_lst, [lambda d: 'age' in d], unique=True)) == 3
 
