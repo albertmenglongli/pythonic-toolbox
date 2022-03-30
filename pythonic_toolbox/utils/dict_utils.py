@@ -1,9 +1,13 @@
-import functools
-from collections import UserDict
+from bisect import bisect_left
+from collections import UserDict, namedtuple
 from copy import deepcopy
-from typing import Any, Callable, Optional, Iterator, List, Hashable, Union, TypeVar
+import functools
+import numbers
+from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
 
 T = TypeVar("T")
+K = TypeVar("K")
+V = TypeVar("V")
 
 
 def dict_until(obj, keys: list, terminate: Optional[Callable[[T], bool]] = None, default=None) -> T:
@@ -281,3 +285,119 @@ class FinalDictObj(DictObj):
     @_frozen_checker
     def update(self, *args, **kwargs):
         super(FinalDictObj, self).update(*args, **kwargs)
+
+
+class RangeKeyDict:
+    """
+    RangeKeyDict uses tuple of key pairs to present range keys, notice that the range is left-closed/right-open
+    [min, max): min <= key < max, Big O of querying is O(log n), n is the number of ranges, due to using bisect inside
+    """
+
+    class Segment(namedtuple('Segment', ['begin', 'end', 'val'])):
+        def __contains__(self, item):
+            return self.begin == item or self.begin < item < self.end
+
+        def __str__(self):
+            return f'({repr(self.begin)}, {repr(self.end)}): {repr(self.val)}'
+
+        def __repr__(self):
+            return f'RangeKeyDict.Segment(begin={repr(self.begin)}, end={repr(self.end)}, val={repr(self.val)}'
+
+    def __init__(self, input_dict: Dict[Union[Tuple[K, K], K], V]) -> None:
+        """keys for input dict must be tuple-like intervals (left-closed, right-open) or single point"""
+        # input validation and generate inner-used structures
+        single_point_map, left_boundary_map, sorted_segments = self._gen_inner_structures_and_validate_inputs(
+            input_dict)
+
+        self._single_point_map = single_point_map
+        self._left_boundary_segment_map = left_boundary_map
+        self._sorted_segments = sorted_segments
+
+    def _gen_inner_structures_and_validate_inputs(self, input_dict):
+        def validate_boundary_key_type(boundary_key_lst: List[K]):
+            if boundary_key_lst:
+                if all(map(lambda x: isinstance(x, numbers.Number), boundary_key_lst)):
+                    # if all the boundaries are numbers, OK
+                    pass
+                else:
+                    if not all(map(lambda x: isinstance(x, type(boundary_key_lst[0])), boundary_key_lst)):
+                        all_types = set(map(type, boundary_key_lst))
+                        raise ValueError(
+                            f'All the boundaries must be either all numbers '
+                            f'or of same type, multi types detected: {[tp.__name__ for tp in all_types]}')
+
+        def sort_and_validate_segments_overlap(segment_lst: List[RangeKeyDict.Segment]):
+            # keys overlapping validation
+            # sort segments inplace by begin value,end value
+            segment_lst.sort(key=lambda s: (s.begin, s.end))
+
+            if len(segment_lst) > 0:
+                for prev, cur in zip(segment_lst, segment_lst[1:]):
+                    if prev.end > cur.begin or prev.begin == prev.end == cur.begin:
+                        raise ValueError(f'Overlap detected: {str(prev)}, {str(cur)}')
+
+        boundary_keys: List[K] = list()
+        single_point_map: Dict[K, V] = dict()
+        left_boundary_key_segment_map: Dict[K, RangeKeyDict.Segment] = dict()
+        segments: List[RangeKeyDict.Segment] = list()
+        for key, val in input_dict.items():
+            if isinstance(key, tuple) and len(key) == 2:
+                left_boundary_key, right_boundary_key = key
+                try:
+                    if (isinstance(left_boundary_key, Hashable) and
+                            isinstance(right_boundary_key, Hashable) and
+                            left_boundary_key <= right_boundary_key):
+                        boundary_keys.extend([left_boundary_key, right_boundary_key])
+                    else:
+                        raise ValueError
+                except (TypeError, ValueError):
+                    raise ValueError(f'Invalid key for {repr(key)}, '
+                                     f'left boundary keys must <= right boundary key, '
+                                     f'and both of them must be hashable')
+            elif isinstance(key, Hashable):
+                single_point_map[key] = val
+                boundary_keys.append(key)
+                left_boundary_key = right_boundary_key = key
+            else:
+                raise ValueError(f'Invalid begin/end pairs detected for {repr(key)}')
+
+            segment = RangeKeyDict.Segment(begin=left_boundary_key, end=right_boundary_key, val=val)
+            segments.append(segment)
+            if left_boundary_key in left_boundary_key_segment_map:
+                prev_segment = left_boundary_key_segment_map[left_boundary_key]
+                raise ValueError(
+                    f'Duplicated left boundary key {repr(left_boundary_key)} detected: '
+                    f'{str(prev_segment)}, {str(segment)}')
+            else:
+                left_boundary_key_segment_map[left_boundary_key] = segment
+
+        validate_boundary_key_type(boundary_keys)
+        sort_and_validate_segments_overlap(segments)
+
+        return single_point_map, left_boundary_key_segment_map, segments
+
+    def __getitem__(self, number):
+        if number in self._single_point_map:
+            return self._single_point_map[number]
+        try:
+            idx = bisect_left(self._sorted_segments, (number,))
+        except TypeError:
+            raise KeyError(f'KeyError: {repr(number)} is not comparable with other keys')
+        else:
+            if idx == 0:
+                if number in self._sorted_segments[idx]:
+                    return self._sorted_segments[idx].val
+            elif idx == len(self._sorted_segments):
+                if number in self._sorted_segments[-1]:
+                    return self._sorted_segments[-1].val
+            else:
+                for target_idx in (idx - 1, idx):
+                    if number in self._sorted_segments[target_idx]:
+                        return self._sorted_segments[target_idx].val
+            raise KeyError(f'KeyError: {repr(number)}')
+
+    def get(self, number, default=None):
+        try:
+            return self.__getitem__(number)
+        except KeyError:
+            return default

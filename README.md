@@ -338,6 +338,79 @@ with pytest.raises(RuntimeError) as __:
 
 ```
 
+#### RangeKeyDict
+
+```python3
+import pytest
+
+from pythonic_toolbox.utils.dict_utils import RangeKeyDict
+
+# test normal case
+range_key_dict = RangeKeyDict({
+    (float('-inf'), 0): 'Negative',
+    (0, 60): 'F',  # 0 <= val < 60
+    (60, 70): 'D',  # 60 <= val < 70
+    (70, 80): 'C',  # 70 <= val < 80
+    (80, 90): 'B',  # 80 <= val < 90
+    (90, 100): 'A',  # 90 <= val < 100
+    (100, 100): 'A+',  # val == 100,
+    # 100: 'A+',  # val == 100, same as previous line
+})
+
+# Big O of querying is O(log n), n is the number of ranges, due to using bisect inside
+assert range_key_dict[-1] == 'Negative'
+assert range_key_dict[0] == 'F'
+assert range_key_dict[55] == 'F'
+assert range_key_dict[60] == 'D'
+assert range_key_dict[75] == 'C'
+assert range_key_dict[85] == 'B'
+assert range_key_dict[95] == 'A'
+assert range_key_dict[100] == 'A+'
+
+with pytest.raises(KeyError) as exec_info:
+    _ = range_key_dict['95']  # when key is not comparable with other integer keys
+assert exec_info.value.args[0] == "KeyError: '95' is not comparable with other keys"
+
+with pytest.raises(KeyError) as exec_info:
+    _ = range_key_dict[150]
+assert exec_info.value.args[0] == 'KeyError: 150'
+
+assert range_key_dict.get(150, 'N/A') == 'N/A'
+
+# combine range-key and fixed-point key together
+range_key_dict = RangeKeyDict({
+    0: '0',
+    1: '1',
+    (10, 100): 'val-between-10-and-100'
+})
+
+assert range_key_dict[0] == '0'
+assert range_key_dict[1] == '1'
+assert range_key_dict[10] == 'val-between-10-and-100'
+assert range_key_dict[50] == 'val-between-10-and-100'
+assert range_key_dict.get(200, 'N/A') == 'N/A'
+
+# validate input keys types and detect range overlaps(segment intersect)
+with pytest.raises(ValueError) as exec_info:
+    RangeKeyDict({
+        (0, 10): 'val-between-0-and-10',
+        (0, 5): 'val-between-0-and-5'
+    })
+expected_error_msg = ("Duplicated left boundary key 0 detected: "
+                      "(0, 10): 'val-between-0-and-10', (0, 5): 'val-between-0-and-5'")
+assert exec_info.value.args[0] == expected_error_msg
+
+with pytest.raises(ValueError) as exec_info:
+    RangeKeyDict({
+        (0, 10): 'val-between-0-and-10',
+        (5, 15): 'val-between-5-and-15'
+    })
+expected_error_msg = ("Overlap detected: "
+                      "(0, 10): 'val-between-0-and-10', (5, 15): 'val-between-5-and-15'")
+assert exec_info.value.args[0] == expected_error_msg
+
+```
+
 #### collect_leaves
 
 ```python3
