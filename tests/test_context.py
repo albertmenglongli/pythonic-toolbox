@@ -4,6 +4,36 @@ def test_SkipContext():
 
     from pythonic_toolbox.utils.context_utils import SkipContext
 
+    # Usage: define a class that inherits the SkipContext,
+    # and takes control of the skip or not logic
+    class MyWorkStation(SkipContext):
+
+        def __init__(self, week_day: str):
+            working_days = {'monday', 'tuesday', 'wednesday', 'thursday', 'friday'}
+            weekends = {'saturday', 'sunday'}
+
+            if week_day.lower() not in working_days.union(weekends):
+                raise ValueError(f'Invalid weekday {week_day}')
+
+            skip = True if week_day.lower() in weekends else False
+            super(MyWorkStation, self).__init__(skip=skip)
+
+    seven_week_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    logged_opening_days = []
+    total_working_hours = 0
+
+    for cur_week_day in seven_week_days:
+        # MyWorkStation will skip the code block when encountering weekends
+        with MyWorkStation(week_day=cur_week_day):
+            # my work station only opens on working days
+            logged_opening_days.append(cur_week_day)  # log this working day
+            total_working_hours += 8  # accumulate working hours, 8 hours on each working day
+
+    # only working days are logged
+    assert logged_opening_days == ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    assert total_working_hours == 8 * 5
+
+    # test basic SkipContext
     count_iterator = itertools.count(start=0, step=1)
 
     flg_skip = True
