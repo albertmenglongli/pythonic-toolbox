@@ -45,9 +45,10 @@ total_working_hours = 0
 for cur_week_day in seven_week_days:
     # MyWorkStation will skip the code block when encountering weekends
     with MyWorkStation(week_day=cur_week_day):
-        # my work station only opens on working days
-        logged_opening_days.append(cur_week_day)  # log this working day
-        total_working_hours += 8  # accumulate working hours, 8 hours on each working day
+        # log this working day
+        logged_opening_days.append(cur_week_day)
+        # accumulate working hours, 8 hours on each working day
+        total_working_hours += 8
 
 # only working days are logged
 assert logged_opening_days == ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
