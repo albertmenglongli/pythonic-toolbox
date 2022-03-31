@@ -325,6 +325,10 @@ class RangeKeyDict:
                         raise ValueError(
                             f'All the boundaries must be either all numbers '
                             f'or of same type, multi types detected: {[tp.__name__ for tp in all_types]}')
+                    else:
+                        # one_key = boundary_key_lst[0]
+                        # one_key < one_key
+                        pass
 
         def sort_and_validate_segments_overlap(segment_lst: List[RangeKeyDict.Segment]):
             # keys overlapping validation
@@ -346,14 +350,15 @@ class RangeKeyDict:
                 try:
                     if (isinstance(left_boundary_key, Hashable) and
                             isinstance(right_boundary_key, Hashable) and
-                            left_boundary_key <= right_boundary_key):
+                            (left_boundary_key < right_boundary_key or
+                             left_boundary_key == right_boundary_key)):
                         boundary_keys.extend([left_boundary_key, right_boundary_key])
                     else:
                         raise ValueError
                 except (TypeError, ValueError):
                     raise ValueError(f'Invalid key for {repr(key)}, '
                                      f'left boundary keys must <= right boundary key, '
-                                     f'and both of them must be hashable')
+                                     f'and both of them must be hashable, have completed comparison methods')
             elif isinstance(key, Hashable):
                 single_point_map[key] = val
                 boundary_keys.append(key)

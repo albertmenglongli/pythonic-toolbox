@@ -409,6 +409,40 @@ expected_error_msg = ("Overlap detected: "
                       "(0, 10): 'val-between-0-and-10', (5, 15): 'val-between-5-and-15'")
 assert exec_info.value.args[0] == expected_error_msg
 
+from typing import Union
+
+from functools import total_ordering
+
+@total_ordering
+class Age:
+    def __init__(self, val: Union[int, float]):
+        if not isinstance(val, (int, float)):
+            raise ValueError('Invalid age value')
+        self.val = val
+
+    def __repr__(self):
+        return f'Age({repr(self.val)})'
+
+    def __le__(self, other):
+        return self.val <= other.val
+
+    def __hash__(self):
+        return hash(self.val)
+
+age_categories_map = RangeKeyDict({
+    (Age(0), Age(2)): 'Baby',
+    (Age(2), Age(15)): 'Children',
+    (Age(15), Age(25)): 'Youth',
+    (Age(25), Age(65)): 'Adults',
+    (Age(65), Age(123)): 'Seniors',
+})
+
+assert age_categories_map[Age(0.5)] == 'Baby'
+assert age_categories_map[Age(12)] == 'Children'
+assert age_categories_map[Age(20)] == 'Youth'
+assert age_categories_map[Age(35)] == 'Adults'
+assert age_categories_map[Age(70)] == 'Seniors'
+
 ```
 
 #### collect_leaves
