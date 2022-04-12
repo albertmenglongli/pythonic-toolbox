@@ -292,6 +292,7 @@ obj = DictObj(naive_dct)
 
 # test basic functional methods like dict
 assert len(obj) == 2
+assert bool(obj) is True
 # same behavior like ordinary dict according to the python version (FILO for popitem for 3.6+)
 assert obj.popitem() == ('key2', 'val2')
 assert obj.popitem() == ('key1', 'val1')
@@ -301,16 +302,23 @@ with pytest.raises(KeyError) as __:
 # a key can be treated like an attribute
 # an attribute can be treated like a key
 obj.key3 = 'val3'
-assert obj.pop('key3', None) == 'val3'
-assert obj.pop('key4', None) is None
+assert obj.pop('key3') == 'val3'
+with pytest.raises(KeyError) as __:
+    obj.pop('key4')
 obj.key5 = 'val5'
 del obj.key5
-assert obj.pop('key5', None) is None
-
 with pytest.raises(KeyError) as __:
     obj.pop('key5')
 with pytest.raises(AttributeError) as __:
     del obj.key5
+
+# test deepcopy
+from copy import deepcopy
+obj = DictObj({'languages': ['Chinese', 'English']})
+copied_obj = deepcopy(obj)
+copied_obj.languages = obj.languages + ['Japanese']
+assert obj.languages == ['Chinese', 'English']
+assert copied_obj.languages == ['Chinese', 'English', 'Japanese']
 
 person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
 
@@ -365,6 +373,14 @@ assert len(chessboard_obj.position) == 2
 assert isinstance(chessboard_obj.position[0][0], DictObj)
 assert chessboard_obj.position[0][0].name == 'knight'
 assert chessboard_obj.position[1][1].name == 'queen'
+
+# edge case empty DictObj
+empty_dict_obj = DictObj({})
+assert len(empty_dict_obj) == 0
+assert bool(empty_dict_obj) is False
+
+obj_dict = DictObj({'data': 'oops'})
+assert obj_dict.data == 'oops'
 
 # params validation
 invalid_key_dct = {
@@ -858,5 +874,83 @@ assert until([1, 2, 3], lambda x: x > 10, default=11) == 11
 # edge cases
 assert until([], default=3) == 3  # nothing provided, return default
 assert until(None, lambda x: x > 10, default=11) == 11
+
+```
+
+### string_utils
+
+#### substitute_string_template_dict
+
+```python3
+import pytest
+from pythonic_toolbox.utils.string_utils import substitute_string_template_dict, CycleError
+
+# simple usage
+# both $variable ${variable} declarations are supported in string template format
+str_template_dict = {
+    'greeting': 'Good Morning, Everyone!',
+    'first_name': 'Albert',
+    'last_name': 'Lee',
+    'full_name': '$first_name $last_name',
+    'age': 34,
+    'speech': '$greeting, I am $full_name, a ${age}-year-old programmer, very glad to meet you!'
+}
+output_dict = substitute_string_template_dict(str_template_dict)
+assert output_dict['full_name'] == 'Albert Lee'
+expected_speech = 'Good Morning, Everyone!, I am Albert Lee, a 34-year-old programmer, very glad to meet you!'
+assert output_dict['speech'] == expected_speech
+
+# complex usage, with dynamic values, and multi value-providing holders
+str_template_dict = {
+    'first_name': 'Daenerys',
+    'last_name': 'Targaryen',
+    'nick_name': 'Dany',
+    'full_name': '$first_name $last_name',
+    'speech': "$nick_name: I'm $full_name ($title1, $title2, $title3), it's $current_time_str, $greeting!",
+}
+
+variables_dict = {'title1': 'Queen of Meereen',
+                  'title2': 'Mother of Dragons'}
+
+class DynamicVariables:
+    @property
+    def current_time_str(self):
+        import datetime
+        return datetime.datetime.now().strftime("%H:%M:%S")
+
+class DefaultUnknownTitle:
+    """
+    A class will always return UnknownTitle, when try to access attribute like
+    title1, title2, ..., titleX
+    """
+
+    def __getattribute__(self, item):
+        if isinstance(item, str) and item.startswith('title') and item[len(item) - 1:].isdigit():
+            return 'UnknownTitle'
+        return super(DefaultUnknownTitle, self).__getattribute__(item)
+
+from unittest.mock import patch, PropertyMock
+
+expected_speech = ("Dany: I'm Daenerys Targaryen (Queen of Meereen, Mother of Dragons, UnknownTitle), "
+                   "it's 08:00:00, good morning everyone!")
+
+# using mock to make DynamicVariables().current_time_str always return 08:00:00
+with patch.object(DynamicVariables, 'current_time_str', return_value='08:00:00', new_callable=PropertyMock):
+    output_dict = substitute_string_template_dict(str_template_dict, variables_dict, DynamicVariables(),
+                                                  DefaultUnknownTitle(),
+                                                  greeting='good morning everyone')
+    assert output_dict['speech'] == expected_speech
+
+# edge cases
+assert substitute_string_template_dict({}) == {}
+
+# cycle detection
+str_template_dict = {
+    'variable_a': 'Hello $variable_b',  # variable_a depends on variable_b
+    'variable_b': 'Hello $variable_a',  # variable_b depends on variable_a, it's a cycle!
+}
+
+with pytest.raises(CycleError) as exec_info:
+    substitute_string_template_dict(str_template_dict)
 
 ```

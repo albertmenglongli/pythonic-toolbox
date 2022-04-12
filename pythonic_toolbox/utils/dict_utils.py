@@ -1,8 +1,9 @@
-from bisect import bisect_left
-from collections import UserDict, namedtuple
-from copy import deepcopy
 import functools
 import numbers
+from bisect import bisect_left
+from collections import UserDict, namedtuple
+from collections.abc import MutableMapping
+from copy import deepcopy
 from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
 
 T = TypeVar("T")
@@ -42,18 +43,18 @@ def collect_leaves(data: Optional[Union[dict, List]] = None,
     def leaf_pred_comb(x):
         return leaf_pred is None or leaf_pred(x)
 
-    def _traverse(_data, keypath=None):
+    def _traverse(_user_dict_hidden_data, keypath=None):
         keypath = keypath or []
-        if isinstance(_data, dict):
-            return {k: _traverse(v, keypath + [k]) for k, v in _data.items()}
-        elif isinstance(_data, list):
-            return [_traverse(elem, keypath) for elem in _data]
+        if isinstance(_user_dict_hidden_data, dict):
+            return {k: _traverse(v, keypath + [k]) for k, v in _user_dict_hidden_data.items()}
+        elif isinstance(_user_dict_hidden_data, list):
+            return [_traverse(elem, keypath) for elem in _user_dict_hidden_data]
         else:
             # no container, just values (str, int, float, None, obj etc.)
-            if keypath_pred_comb(keypath) and leaf_pred_comb(_data):
-                leaves.append(_data)
+            if keypath_pred_comb(keypath) and leaf_pred_comb(_user_dict_hidden_data):
+                leaves.append(_user_dict_hidden_data)
 
-            return _data
+            return _user_dict_hidden_data
 
     _traverse(data)
     return leaves
@@ -139,8 +140,80 @@ def walk_leaves(data: Optional[Union[dict, List]] = None,
     return obj if inplace is False else None
 
 
-class DictObj(UserDict):
+class MyUserDict(MutableMapping):
 
+    # Start by filling-out the abstract methods
+    def __init__(*args, **kwargs):
+        if not args:
+            raise TypeError("descriptor '__init__' of 'UserDict' object "
+                            "needs an argument")
+        self, *args = args
+        if len(args) > 1:
+            raise TypeError('expected at most 1 arguments, got %d' % len(args))
+        if args:
+            dict = args[0]
+        elif 'dict' in kwargs:
+            dict = kwargs.pop('dict')
+            import warnings
+            warnings.warn("Passing 'dict' as keyword argument is deprecated",
+                          DeprecationWarning, stacklevel=2)
+        else:
+            dict = None
+        self._user_dict_hidden_data = {}
+        if dict is not None:
+            self.update(dict)
+        if len(kwargs):
+            self.update(kwargs)
+
+    def __len__(self):
+        return len(self._user_dict_hidden_data)
+
+    def __getitem__(self, key):
+        if key in self._user_dict_hidden_data:
+            return self._user_dict_hidden_data[key]
+        if hasattr(self.__class__, "__missing__"):
+            return self.__class__.__missing__(self, key)
+        raise KeyError(key)
+
+    def __setitem__(self, key, item):
+        self._user_dict_hidden_data[key] = item
+
+    def __delitem__(self, key):
+        del self._user_dict_hidden_data[key]
+
+    def __iter__(self):
+        return iter(self._user_dict_hidden_data)
+
+    # Modify __contains__ to work correctly when __missing__ is present
+    def __contains__(self, key):
+        return key in self._user_dict_hidden_data
+
+    # Now, add the methods in dicts but not in MutableMapping
+    def __repr__(self):
+        return repr(self._user_dict_hidden_data)
+
+    def copy(self):
+        if self.__class__ is UserDict:
+            return UserDict(self._user_dict_hidden_data.copy())
+        import copy
+        data = self._user_dict_hidden_data
+        try:
+            self._user_dict_hidden_data = {}
+            c = copy.copy(self)
+        finally:
+            self._user_dict_hidden_data = data
+        c.update(self)
+        return c
+
+    @classmethod
+    def fromkeys(cls, iterable, value=None):
+        d = cls()
+        for key in iterable:
+            d[key] = value
+        return d
+
+
+class DictObj(MyUserDict):
     def __init__(self, in_dict: dict):
 
         in_dict = deepcopy(in_dict)
@@ -165,35 +238,40 @@ class DictObj(UserDict):
             return data
 
     def __setitem__(self, key, item):
-        self.data[key] = self._create_obj_or_keep(item)
+        self._user_dict_hidden_data[key] = self._create_obj_or_keep(item)
 
     def popitem(self):
         """
         Override popitem from MutableMapping, make behavior popitem FILO like ordinary dict since 3.6
         """
-        return self.data.popitem()
+        return self._user_dict_hidden_data.popitem()
+
+    def pop(self, key):
+        val = self._user_dict_hidden_data[key]
+        del self._user_dict_hidden_data[key]
+        return val
 
     def __getattribute__(self, item):
-        if item == 'data':
-            return self.__dict__['data']
+        if item == '_user_dict_hidden_data':
+            return self.__dict__['_user_dict_hidden_data']
         else:
             return super(DictObj, self).__getattribute__(item)
 
     def __delitem__(self, key):
-        del self.data[key]
+        del self._user_dict_hidden_data[key]
 
     def __setattr__(self, key, value):
-        """DictObj that cannot change attribute"""
-        if key == 'data':
-            object.__setattr__(self, 'data', value)
+        """DictObj that can change attribute"""
+        if key == '_user_dict_hidden_data':
+            object.__setattr__(self, '_user_dict_hidden_data', value)
         else:
-            data = object.__getattribute__(self, 'data')
+            data = object.__getattribute__(self, '_user_dict_hidden_data')
             data[key] = self._create_obj_or_keep(value)
-            object.__setattr__(self, 'data', data)
+            object.__setattr__(self, '_user_dict_hidden_data', data)
 
     def __getattr__(self, item):
         try:
-            data = self.__dict__['data']
+            data = self.__dict__['_user_dict_hidden_data']
             res = data[item]
         except KeyError:
             raise AttributeError(f'AttributeError {item}')
@@ -208,9 +286,10 @@ class DictObj(UserDict):
 
     def to_dict(self):
         result = {}
-        for key, item in self.data.items():
+        for key, item in self._user_dict_hidden_data.items():
             if isinstance(item, (list, tuple)):
-                result[key] = [x.to_dict() if isinstance(x, DictObj) else x for x in item]
+                result[key] = [x.to_dict() if hasattr(x, 'to_dict') and callable(getattr(x, 'to_dict')) else x
+                               for x in item]
             elif isinstance(item, DictObj):
                 result[key] = item.to_dict()
             else:
@@ -263,6 +342,10 @@ class FinalDictObj(DictObj):
     @_frozen_checker
     def popitem(self):
         return super(FinalDictObj, self).popitem()
+
+    @_frozen_checker
+    def pop(self, key):
+        return super(FinalDictObj, self).pop(key)
 
     def __setattr__(self, key, value):
         """DictObj that cannot change attribute"""

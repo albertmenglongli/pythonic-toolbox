@@ -205,6 +205,7 @@ def test_DictObj():
 
     # test basic functional methods like dict
     assert len(obj) == 2
+    assert bool(obj) is True
     # same behavior like ordinary dict according to the python version (FILO for popitem for 3.6+)
     assert obj.popitem() == ('key2', 'val2')
     assert obj.popitem() == ('key1', 'val1')
@@ -214,16 +215,23 @@ def test_DictObj():
     # a key can be treated like an attribute
     # an attribute can be treated like a key
     obj.key3 = 'val3'
-    assert obj.pop('key3', None) == 'val3'
-    assert obj.pop('key4', None) is None
+    assert obj.pop('key3') == 'val3'
+    with pytest.raises(KeyError) as __:
+        obj.pop('key4')
     obj.key5 = 'val5'
     del obj.key5
-    assert obj.pop('key5', None) is None
-
     with pytest.raises(KeyError) as __:
         obj.pop('key5')
     with pytest.raises(AttributeError) as __:
         del obj.key5
+
+    # test deepcopy
+    from copy import deepcopy
+    obj = DictObj({'languages': ['Chinese', 'English']})
+    copied_obj = deepcopy(obj)
+    copied_obj.languages = obj.languages + ['Japanese']
+    assert obj.languages == ['Chinese', 'English']
+    assert copied_obj.languages == ['Chinese', 'English', 'Japanese']
 
     person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
 
@@ -278,6 +286,14 @@ def test_DictObj():
     assert isinstance(chessboard_obj.position[0][0], DictObj)
     assert chessboard_obj.position[0][0].name == 'knight'
     assert chessboard_obj.position[1][1].name == 'queen'
+
+    # edge case empty DictObj
+    empty_dict_obj = DictObj({})
+    assert len(empty_dict_obj) == 0
+    assert bool(empty_dict_obj) is False
+
+    obj_dict = DictObj({'data': 'oops'})
+    assert obj_dict.data == 'oops'
 
     # params validation
     invalid_key_dct = {
