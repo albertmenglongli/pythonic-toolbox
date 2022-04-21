@@ -246,6 +246,12 @@ queue = deque([1, 2, 3, 4, 5])
 with pytest.raises(IndexError) as exec_info:
     deque_pop_any(queue, idx=102)
 
+# edge case: pop from empty deque
+queue = deque()
+with pytest.raises(IndexError) as exec_info:
+    deque_pop_any(queue, idx=0)
+assert exec_info.value.args[0] == 'pop from empty deque'
+
 ```
 
 #### deque_split

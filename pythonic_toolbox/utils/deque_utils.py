@@ -13,6 +13,8 @@ def deque_split(queue: Deque[T], num: int) -> Tuple[Deque[T], Deque[T]]:
 
 
 def deque_pop_any(queue: Deque[T], idx: int) -> T:
+    if len(queue) == 0:
+        raise IndexError('pop from empty deque')
     if not 0 <= idx <= len(queue) - 1:
         raise IndexError('index out of range')
     queue.rotate(-idx)
