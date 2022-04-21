@@ -11,7 +11,7 @@ THREE_BACKTICKS = '```'
 
 TITLE = ("""# Pythonic toolbox
 
-A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.9 .
+A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.10 .
 
 This **README.md** is **Auto-Generated** from testing files by **generate_readme_markdown.py** .
 
