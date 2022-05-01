@@ -4,7 +4,8 @@ from bisect import bisect_left
 from collections import UserDict, namedtuple
 from collections.abc import MutableMapping
 from copy import deepcopy
-from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union
+from operator import attrgetter
+from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence
 
 T = TypeVar("T")
 K = TypeVar("K")
@@ -396,7 +397,9 @@ class RangeKeyDict:
         self._left_boundary_segment_map = left_boundary_map
         self._sorted_segments = sorted_segments
 
-    def _gen_inner_structures_and_validate_inputs(self, input_dict):
+    @staticmethod
+    def _gen_inner_structures_and_validate_inputs(input_dict: Dict[Union[Tuple[K, K], K], V]) -> Tuple[
+        Dict[K, V], Dict[K, Segment], Sequence[Segment]]:
         def validate_boundary_key_type(boundary_key_lst: List[K]):
             if boundary_key_lst:
                 if all(map(lambda x: isinstance(x, numbers.Number), boundary_key_lst)):
@@ -413,7 +416,7 @@ class RangeKeyDict:
                         # one_key < one_key
                         pass
 
-        def sort_and_validate_segments_overlap(segment_lst: List[RangeKeyDict.Segment]):
+        def sort_and_validate_segments_overlap(segment_lst: List[RangeKeyDict.Segment]) -> None:
             # keys overlapping validation
             # sort segments inplace by begin value,end value
             segment_lst.sort(key=lambda s: (s.begin, s.end))
@@ -468,7 +471,7 @@ class RangeKeyDict:
         if number in self._single_point_map:
             return self._single_point_map[number]
         try:
-            idx = bisect_left(self._sorted_segments, (number,))
+            idx = bisect_left(list(map(attrgetter('begin'), self._sorted_segments)), number)
         except TypeError:
             raise KeyError(f'KeyError: {repr(number)} is not comparable with other keys')
         else:
