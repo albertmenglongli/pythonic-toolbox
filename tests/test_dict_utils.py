@@ -307,6 +307,7 @@ def test_DictObj():
 
 def test_FinalDictObj():
     import pytest
+    from typing import cast
 
     from pythonic_toolbox.utils.dict_utils import FinalDictObj
 
@@ -330,7 +331,7 @@ def test_FinalDictObj():
     assert isinstance(fixed_person.languages, tuple)
     with pytest.raises(AttributeError) as exec_info:
         # list values are changed into tuple to avoid being modified
-        fixed_person.languages.append('Japanese')
+        cast(list, fixed_person.languages).append('Japanese')
     expected_error_str = "'tuple' object has no attribute 'append'"
     assert exec_info.value.args[0] == expected_error_str
     assert fixed_person.to_dict() == person_dct
@@ -452,3 +453,65 @@ def test_RangeKeyDict():
     assert age_categories_map[Age(20)] == 'Youth'
     assert age_categories_map[Age(35)] == 'Adults'
     assert age_categories_map[Age(70)] == 'Seniors'
+
+
+def test_StrKeyIdDict():
+    import pytest
+
+    from pythonic_toolbox.utils.dict_utils import StrKeyIdDict
+
+    data = {1: 'a', 2: 'b', '3': 'c'}
+    my_dict = StrKeyIdDict(data)
+
+    # usage: value can be accessed by id (str: int-like/uuid-like/whatever) or id (int)
+    assert my_dict['1'] == my_dict[1] == 'a'
+    assert my_dict.keys() == {'1', '2', '3'}  # all keys are str type
+    my_dict['4'] = 'd'
+    assert my_dict['4'] == 'd'
+    my_dict[4] = 'd'
+    assert my_dict['4'] == 'd'
+    my_dict.update({4: 'd'})
+    assert my_dict['4'] == 'd'
+
+    # test delete key
+    del my_dict[4]
+    assert my_dict.keys() == {'1', '2', '3'}  # '4' is not in the dict anymore
+
+    # assign value to an arbitrary string key that is not in the dict
+    my_dict.update({'some-uuid': 'something'})
+    assert my_dict['some-uuid'] == 'something'
+
+    with pytest.raises(TypeError):
+        # key '1', 1 both stands for key '1',
+        # so we get duplicated keys when initializing instance, oops!
+        my_dict = StrKeyIdDict({'1': 'a', 1: 'A'})
+
+    assert my_dict.get(1) == 'a'
+    assert my_dict.get('NotExistKey') is None
+    assert my_dict.get('NotExistKey', 'NotExistValue') == 'NotExistValue'
+
+    # test edge cases
+    assert StrKeyIdDict() == {}
+
+    # test shallow copy
+    my_dict[5] = ['e1', 'e2', 'e3']
+    copy_dict = my_dict.copy()
+    copy_dict[1] = 'A'
+    assert my_dict[1] == 'a'
+    my_dict['5'].append('e4')
+    assert copy_dict['5'] == ['e1', 'e2', 'e3', 'e4']
+
+    # test deep copy
+    from copy import deepcopy
+
+    copy_dict = deepcopy(my_dict)
+    my_dict[5].append('e5')
+    assert my_dict['5'] == ['e1', 'e2', 'e3', 'e4', 'e5']
+    assert copy_dict[5] == ['e1', 'e2', 'e3', 'e4']
+
+    # test constructor (from keys)
+    my_dict = StrKeyIdDict.fromkeys([1, 2, 3], None)
+    assert my_dict == {'1': None, '2': None, '3': None}
+    # test update and overwrite
+    my_dict.update(StrKeyIdDict({1: 'a', 2: 'b', 3: 'c', 4: 'd'}))
+    assert my_dict == {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}

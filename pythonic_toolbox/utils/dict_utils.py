@@ -5,7 +5,7 @@ from collections import UserDict, namedtuple
 from collections.abc import MutableMapping
 from copy import deepcopy
 from operator import attrgetter
-from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence
+from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence, cast
 
 T = TypeVar("T")
 K = TypeVar("K")
@@ -492,3 +492,74 @@ class RangeKeyDict:
             return self.__getitem__(number)
         except KeyError:
             return default
+
+
+class StrKeyIdDict(UserDict):
+    """
+    A dictionary convert all ID keys (string or integer) to string type.
+    Int type ID is fast in DB, but when being passed between systems/processes/APIs,
+    we convert it to string for dict to avoid being bitten by off-hands ID types problem.
+    """
+
+    def __init__(self, *args, **kwargs):
+        validated_data = self._validate_input(*args, **kwargs)
+        super().__init__(validated_data)
+
+    def _validate_input(self, *args, **kwargs) -> Dict:
+        if len(args) > 1:
+            raise TypeError('expected at most 1 arguments, got %d' % len(args))
+        if args:
+            my_dict = args[0]
+        elif 'dict' in kwargs:
+            my_dict = kwargs.pop('dict')
+        else:
+            my_dict = {}
+
+        raw_data: Dict = {}
+        raw_data.update(my_dict)
+        raw_data.update(kwargs)
+
+        valid_data = {}
+        for key, val in raw_data.items():
+            if not self.is_valid_key(key):
+                raise TypeError(
+                    f'{repr(key)}: Key for ID must be an integer or a string, but got {type(key)}')
+            if str(key) not in valid_data.keys():
+                valid_data[str(key)] = val
+            else:
+                # handle duplicated keys (e.g. '1', 1)
+                duplicate_keys = set()
+                if str(key) in raw_data.keys():
+                    duplicate_keys.add(str(key))
+                if int(key) in raw_data.keys():
+                    duplicate_keys.add(int(key))
+                raise TypeError(f'Duplicated keys: {",".join(map(repr, duplicate_keys))} detected')
+
+        return valid_data
+
+    @classmethod
+    def is_valid_key(cls, key):
+        return isinstance(key, (int, str))
+
+    def __missing__(self, key):
+        if isinstance(key, str):
+            raise KeyError(f'KeyError: {repr(key)}')
+        return self[str(key)]
+
+    def __contains__(self, key):
+        return str(key) in self.data
+
+    def __setitem__(self, key, value):
+        if not self.is_valid_key(key):
+            raise TypeError(f'Key {repr(key)} must be a string or integer')
+        self.data[str(key)] = value
+
+    def __delitem__(self, key):
+        del self.data[str(key)]
+
+    @classmethod
+    def fromkeys(cls, iterable, value=None):
+        d = cls()
+        for key in iterable:
+            d[key] = value
+        return d
