@@ -25,6 +25,15 @@ python3 tests/generate_readme_markdown.py
 
 A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.10 .
 
+
+|Build | Action |
+|-----|--------|
+|__Python3.6__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml/badge.svg?branch=master'/></a>       |
+|__Python3.7__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml/badge.svg?branch=master'/></a>       |
+|__Python3.8__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml/badge.svg?branch=master'/></a>       |
+|__Python3.9__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml/badge.svg?branch=master'/></a>       |
+|__Python3.10__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml/badge.svg?branch=master'/></a>    |
+
 ## Installation
 
 ```bash
