@@ -5,7 +5,7 @@ from collections import UserDict, namedtuple
 from collections.abc import MutableMapping
 from copy import deepcopy
 from operator import attrgetter
-from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence, cast
+from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence
 
 T = TypeVar("T")
 K = TypeVar("K")
@@ -130,9 +130,11 @@ def walk_leaves(data: Optional[Union[dict, List]] = None,
         This inner function transform leaves value inplace
         """
         if isinstance(_obj, dict):
-            __ = {k: _traverse(v, _obj, k) for k, v in _obj.items()}
+            for k, v in _obj.items():
+                _traverse(v, _obj, k)
         elif isinstance(_obj, list):
-            __ = [_traverse(elem, _obj, idx) for idx, elem in enumerate(_obj)]
+            for idx, elem in enumerate(_obj):
+                _traverse(elem, _obj, idx)
         else:
             # no container, just values (str, int, float, None,  obj etc.)
             parent[idx] = trans_fun(_obj)
@@ -282,7 +284,7 @@ class DictObj(MyUserDict):
     def __delattr__(self, item):
         try:
             del self[item]
-        except KeyError as e:
+        except KeyError:
             raise AttributeError
 
     def to_dict(self):
