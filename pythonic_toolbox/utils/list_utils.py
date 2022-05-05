@@ -2,6 +2,8 @@ import json
 from collections import defaultdict
 from typing import List, Iterable, Union, Optional, Callable, TypeVar
 
+from funcy import first, identity
+
 T = TypeVar("T")
 
 
@@ -26,8 +28,6 @@ def sort_with_custom_orders(values: List[T],
     if not isinstance(suffix_orders, list):
         raise ValueError('suffix_orders should be a list if provided')
 
-    def first(seq): return next(iter(seq), UNSIGNED)
-    def identity(x): return x
     default_hash_fun = json.dumps
 
     if key is None:
@@ -48,7 +48,8 @@ def sort_with_custom_orders(values: List[T],
 
     is_value_type_hashable = True
     try:
-        __ = {sample: sample}
+        # judge if value type is hashable on runtime
+        {sample: None}
     except TypeError:
         is_value_type_hashable = False
 
