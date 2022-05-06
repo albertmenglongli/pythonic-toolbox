@@ -516,6 +516,9 @@ def test_StrKeyIdDict():
     my_dict.update(StrKeyIdDict({1: 'a', 2: 'b', 3: 'c', 4: 'd'}))
     assert my_dict == {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
 
+    my_dict = StrKeyIdDict([(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')])
+    assert my_dict['1'] == my_dict[1] == 'a'
+
     # reassign StrKeyIdDict instance to another StrKeyIdDict instance
     my_dict = StrKeyIdDict(my_dict)
     assert my_dict == {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
