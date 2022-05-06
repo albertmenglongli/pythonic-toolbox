@@ -107,7 +107,7 @@ def main():
         f.write(readme_content)
 
     try:
-        curl_cmd_str = 'markdown-toc  -h 4 -t github -toc "## Table of Contents (auto generated)" README.md'
+        curl_cmd_str = 'markdown-toc  -h 4 -t github -toc "## Table of Contents" README.md'
         subprocess.run(curl_cmd_str, shell=True, universal_newlines=True,
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        cwd=README_PATH.parent, check=True)

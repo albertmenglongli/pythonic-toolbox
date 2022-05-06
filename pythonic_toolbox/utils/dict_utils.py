@@ -553,7 +553,7 @@ class StrKeyIdDict(UserDict):
 
     def __setitem__(self, key, value):
         if not self.is_valid_key(key):
-            raise TypeError(f'Key {repr(key)} must be a string or integer')
+            raise TypeError(f'Key must be a string or integer, but got {repr(key)}')
         self.data[str(key)] = value
 
     def __delitem__(self, key):

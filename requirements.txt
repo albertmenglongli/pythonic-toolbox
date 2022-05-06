@@ -1,4 +1,3 @@
 pytest
 funcy>=1.16
 markdown-toc>=1.2.6
-
