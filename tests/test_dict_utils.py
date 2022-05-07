@@ -509,6 +509,10 @@ def test_StrKeyIdDict():
     assert my_dict['5'] == ['e1', 'e2', 'e3', 'e4', 'e5']
     assert copy_dict[5] == ['e1', 'e2', 'e3', 'e4']
 
+    # test constructor
+    my_dict = StrKeyIdDict(uuid1='a', uuid2='b')
+    assert my_dict['uuid1'] == 'a'
+
     # test constructor (from keys)
     my_dict = StrKeyIdDict.fromkeys([1, 2, 3], None)
     assert my_dict == {'1': None, '2': None, '3': None}
