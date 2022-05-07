@@ -1,15 +1,6 @@
-"""A setuptools based setup module.
-See:
-https://packaging.python.org/en/latest/distributing.html
-https://github.com/pypa/sampleproject
-"""
-
-# Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-# To use a consistent encoding
-from os import path
 
-here = path.abspath(path.dirname(__file__))
+version = '1.1.24'
 
 long_description = 'A toolbox' \
                    ' containing multi useful pythonic utils, functions, decorators etc.'
@@ -22,7 +13,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.1.23',
+    version=version,
 
     description='a toolbox with pythonic utils, tools',
     long_description=long_description,
@@ -52,17 +43,19 @@ setup(
         # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: MIT License',
 
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate whether you support Python 2, Python 3 or both.
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
 
     # What does your project relate to?
-    keywords='toolbox',
+    keywords=['toolbox'],
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -73,8 +66,14 @@ setup(
     py_modules=["pythonic_toolbox"],
 
     install_requires=[
-        'pytest',
-        'funcy>=1.16',
-    ]
+        "setuptools",
+        "funcy>=1.16",
+    ],
+    extras_require={
+        "test": [
+            "pytest",
+            "wheel",
+        ]
+    }
 
 )
