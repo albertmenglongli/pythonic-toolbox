@@ -1014,6 +1014,13 @@ assert first == 'a'
 assert second == 'b'
 assert rest == ['c', 'x']
 
+# test edge case, nothing to unpack
+empty = unpack_list([], target_num=0, default=None)
+assert empty == []
+
+empty = unpack_list(['a', 'b'], target_num=0, default=None)
+assert empty == []
+
 ```
 
 #### until
