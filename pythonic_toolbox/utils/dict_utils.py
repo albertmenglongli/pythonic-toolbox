@@ -5,21 +5,24 @@ from collections import UserDict, namedtuple
 from collections.abc import MutableMapping
 from copy import deepcopy
 from operator import attrgetter
-from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence
+from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence, Set
 
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
 
 
-def dict_until(obj, keys: list, terminate: Optional[Callable[[T], bool]] = None, default=None) -> T:
+def dict_until(obj, keys: List[Hashable], terminate: Optional[Callable[[T], bool]] = None, default=None) -> T:
     class Empty:
         pass
 
     UNSIGNED = Empty()
 
+    def default_terminate(v: Any) -> bool:
+        return v is not UNSIGNED
+
     if terminate is None:
-        def terminate(v): return v is not UNSIGNED
+        terminate = default_terminate
 
     from pythonic_toolbox.utils.list_utils import until
 
@@ -34,7 +37,7 @@ def dict_until(obj, keys: list, terminate: Optional[Callable[[T], bool]] = None,
 def collect_leaves(data: Optional[Union[dict, List]] = None,
                    keypath_pred: Optional[Callable[[List[Hashable]], bool]] = None,
                    leaf_pred: Optional[Callable[[T], bool]] = None) -> List[T]:
-    leaves = list()
+    leaves: List[Any] = list()
     if not data:
         return leaves
 
@@ -61,10 +64,10 @@ def collect_leaves(data: Optional[Union[dict, List]] = None,
     return leaves
 
 
-def select_list_of_dicts(dict_lst: List[dict],
-                         preds: Optional[Iterator[Callable[[dict], bool]]] = None,
-                         keys: Optional[Hashable] = None,
-                         unique=False, val_for_missing_key=None) -> List[dict]:
+def select_list_of_dicts(dict_lst: List[Dict[Hashable, Any]],
+                         preds: Optional[List[Callable[[Dict[Hashable, Any]], bool]]] = None,
+                         keys: Optional[List[Hashable]] = None,
+                         unique=False, val_for_missing_key=None) -> List[Dict[Hashable, Any]]:
     """ Select part of the dict collections."""
 
     from funcy import rpartial, project, all_fn
@@ -73,7 +76,7 @@ def select_list_of_dicts(dict_lst: List[dict],
     keys = keys or []
 
     dict_lst = deepcopy(dict_lst)
-    res: Union[List[dict], Iterator[dict]] = dict_lst
+    res: Union[List[Dict[Hashable, Any]], Iterator[Dict[Hashable, Any]]] = dict_lst
 
     if preds:
         res = filter(all_fn(*preds), dict_lst)
@@ -85,13 +88,13 @@ def select_list_of_dicts(dict_lst: List[dict],
         res = [{k: dct.get(k, val_for_missing_key) for k in keys} for dct in res]
 
     if unique is True:
-        res = unique_list_of_dicts(res)
+        res = list(unique_list_of_dicts(res))
 
     return list(res)
 
 
-def unique_list_of_dicts(dict_list: List[dict]) -> List[dict]:
-    unique_res: List[dict] = []
+def unique_list_of_dicts(dict_list: List[Dict[Hashable, Any]]) -> List[Dict[Hashable, Any]]:
+    unique_res: List[Dict[Hashable, Any]] = []
     items_tuple_set = set()
     for d in dict_list:
         items_tuple = tuple(d.items())
@@ -447,7 +450,7 @@ class RangeKeyDict:
                     raise ValueError(f'Invalid key for {repr(key)}, '
                                      f'left boundary keys must <= right boundary key, '
                                      f'and both of them must be hashable, have completed comparison methods')
-            elif isinstance(key, Hashable):
+            elif not isinstance(key, tuple) and isinstance(key, Hashable):
                 single_point_map[key] = val
                 boundary_keys.append(key)
                 left_boundary_key = right_boundary_key = key
@@ -521,7 +524,7 @@ class StrKeyIdDict(UserDict):
         raw_data.update(my_dict)
         raw_data.update(kwargs)
 
-        valid_data = {}
+        valid_data: Dict[str, Any] = {}
         for key, val in raw_data.items():
             if not self.is_valid_key(key):
                 raise TypeError(
@@ -530,7 +533,7 @@ class StrKeyIdDict(UserDict):
                 valid_data[str(key)] = val
             else:
                 # handle duplicated keys (e.g. '1', 1)
-                duplicate_keys = set()
+                duplicate_keys: Set[Union[str, int]] = set()
                 if str(key) in raw_data.keys():
                     duplicate_keys.add(str(key))
                 if int(key) in raw_data.keys():
