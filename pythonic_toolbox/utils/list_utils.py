@@ -112,3 +112,7 @@ def until(values: Optional[Union[List[T], Iterable]],
         return default
     else:
         raise ValueError('values type should be list, Iterable')
+
+
+def unpack_list(source: List, target_num, default=None) -> List:
+    return [*source, *([default] * (target_num - len(source)))] if len(source) < target_num else source[:target_num]

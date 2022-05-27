@@ -86,3 +86,25 @@ def test_sort_with_custom_orders():
 
     expected = [Menglong, Alice, Albert]
     assert sort_with_custom_orders(persons, prefix_orders=[Menglong, Person(4, 'Anyone', 40)]) == expected
+
+
+def test_unpack_list():
+    from pythonic_toolbox.utils.list_utils import unpack_list
+
+    first, second, third = unpack_list(['a', 'b', 'c', 'd'], target_num=3)
+    assert first == 'a'
+    assert second == 'b'
+    assert third == 'c'
+
+    first, second, third = unpack_list(['a', 'b'], target_num=3, default=None)
+    assert first == 'a'
+    assert second == 'b'
+    assert third is None
+
+    first, second, third = unpack_list([], target_num=3, default=0)
+    assert first == second == third == 0
+
+    first, second, *rest = unpack_list(['a', 'b', 'c'], target_num=4, default='x')
+    assert first == 'a'
+    assert second == 'b'
+    assert rest == ['c', 'x']
