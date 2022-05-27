@@ -1,16 +1,19 @@
 import json
 from collections import defaultdict
-from typing import List, Iterable, Union, Optional, Callable, TypeVar
+from typing import List, Iterable, Union, Optional, Callable, TypeVar, Any, Tuple, DefaultDict, Hashable
 
 from funcy import first, identity
 
 T = TypeVar("T")
+D = TypeVar("D")  # type for default value
 
 
 def sort_with_custom_orders(values: List[T],
                             prefix_orders: Optional[List[T]] = None,
                             suffix_orders: Optional[List[T]] = None,
-                            key=None, hash_fun=None, reverse=False) -> List[T]:
+                            key: Optional[Callable[[T], Any]] = None,
+                            hash_fun: Optional[Callable] = None,
+                            reverse: bool = False) -> List[T]:
     class Empty:
         pass
 
@@ -77,36 +80,42 @@ def sort_with_custom_orders(values: List[T],
     if prefix_orders_set.intersection(suffix_orders_set):
         raise ValueError('prefix and suffix contains same value')
 
-    order_map = defaultdict(lambda: 1)
+    order_map: DefaultDict[Hashable, int] = defaultdict(lambda: 1)
     for idx, item in enumerate(prefix_orders):
         order_map[_hash_fun(item)] = idx - len(prefix_orders)
 
     for idx, item in enumerate(suffix_orders, start=2):
         order_map[_hash_fun(item)] = idx
 
-    sorted_values = sorted(values, key=lambda x: (order_map[hash_fun(x)], key(x)), reverse=reverse)
+    def key_func(x: T) -> Tuple[int, Any]:
+        return order_map[hash_fun(x)], key(x)
+
+    sorted_values = sorted(values, key=key_func, reverse=reverse)
 
     return sorted_values
 
 
 def until(values: Optional[Union[List[T], Iterable]],
           terminate: Optional[Callable[[T], bool]] = None,
-          default=None) -> T:
+          default: Optional[D] = None) -> Optional[Union[T, D]]:
     class Empty:
         pass
 
     UNSIGNED = Empty()
 
+    def default_terminate(v: Any) -> bool:
+        return v is not UNSIGNED
+
     if values is None:
         return default
 
     if terminate is None:
-        def terminate(v): return v is not UNSIGNED
+        terminate = default_terminate
 
     if isinstance(values, (list, Iterable)):
-        for i in values:
-            if terminate(i):
-                return i
+        for value in values:
+            if terminate(value):
+                return value
         else:
             pass
         return default
@@ -114,5 +123,5 @@ def until(values: Optional[Union[List[T], Iterable]],
         raise ValueError('values type should be list, Iterable')
 
 
-def unpack_list(source: List, target_num, default=None) -> List:
+def unpack_list(source: List[Any], target_num: int, default: Optional[Any] = None) -> List[Any]:
     return [*source, *([default] * (target_num - len(source)))] if len(source) < target_num else source[:target_num]
