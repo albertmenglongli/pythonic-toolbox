@@ -10,9 +10,12 @@ from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tupl
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
+HashableT = TypeVar("HashableT", bound=Hashable)
 
 
-def dict_until(obj, keys: List[Hashable], terminate: Optional[Callable[[T], bool]] = None, default=None) -> T:
+def dict_until(obj, keys: List[HashableT],
+               terminate: Optional[Callable[[Any], bool]] = None,
+               default: Optional[Any] = None) -> Any:
     class Empty:
         pass
 
@@ -34,9 +37,9 @@ def dict_until(obj, keys: List[Hashable], terminate: Optional[Callable[[T], bool
     return val
 
 
-def collect_leaves(data: Optional[Union[dict, List]] = None,
-                   keypath_pred: Optional[Callable[[List[Hashable]], bool]] = None,
-                   leaf_pred: Optional[Callable[[T], bool]] = None) -> List[T]:
+def collect_leaves(data: Optional[Union[Dict, List]] = None,
+                   keypath_pred: Optional[Callable[[List[HashableT]], bool]] = None,
+                   leaf_pred: Optional[Callable[[Any], bool]] = None) -> List[Any]:
     leaves: List[Any] = list()
     if not data:
         return leaves
@@ -64,19 +67,21 @@ def collect_leaves(data: Optional[Union[dict, List]] = None,
     return leaves
 
 
-def select_list_of_dicts(dict_lst: List[Dict[Hashable, Any]],
-                         preds: Optional[List[Callable[[Dict[Hashable, Any]], bool]]] = None,
-                         keys: Optional[List[Hashable]] = None,
-                         unique=False, val_for_missing_key=None) -> List[Dict[Hashable, Any]]:
+def select_list_of_dicts(dict_lst: List[Dict],
+                         preds: Optional[List[Callable[[Dict], bool]]] = None,
+                         keys: Optional[List[HashableT]] = None,
+                         unique=False, val_for_missing_key=None) -> List[Dict]:
     """ Select part of the dict collections."""
 
     from funcy import rpartial, project, all_fn
 
     preds = preds or []
+    preds = list(preds)  # make a shallow copy
     keys = keys or []
+    keys = list(keys)  # make a shallow copy
 
     dict_lst = deepcopy(dict_lst)
-    res: Union[List[Dict[Hashable, Any]], Iterator[Dict[Hashable, Any]]] = dict_lst
+    res: Union[List[Dict], Iterator[Dict]] = dict_lst
 
     if preds:
         res = filter(all_fn(*preds), dict_lst)
@@ -93,8 +98,8 @@ def select_list_of_dicts(dict_lst: List[Dict[Hashable, Any]],
     return list(res)
 
 
-def unique_list_of_dicts(dict_list: List[Dict[Hashable, Any]]) -> List[Dict[Hashable, Any]]:
-    unique_res: List[Dict[Hashable, Any]] = []
+def unique_list_of_dicts(dict_list: List[Dict]) -> List[Dict]:
+    unique_res: List[Dict] = list()
     items_tuple_set = set()
     for d in dict_list:
         items_tuple = tuple(d.items())
@@ -104,9 +109,9 @@ def unique_list_of_dicts(dict_list: List[Dict[Hashable, Any]]) -> List[Dict[Hash
     return unique_res
 
 
-def walk_leaves(data: Optional[Union[dict, List]] = None,
+def walk_leaves(data: Optional[Union[Dict, List]] = None,
                 trans_fun: Optional[Callable[[Any], Any]] = None,
-                inplace=False) -> Optional[Union[dict, List]]:
+                inplace: bool = False) -> Optional[Union[Dict, List]]:
     """
     :param data: data can be nested dict, list
     :param trans_fun: leaf transform function
@@ -220,7 +225,7 @@ class MyUserDict(MutableMapping):
 
 
 class DictObj(MyUserDict):
-    def __init__(self, in_dict: dict):
+    def __init__(self, in_dict: Dict):
 
         in_dict = deepcopy(in_dict)
 
@@ -252,7 +257,7 @@ class DictObj(MyUserDict):
         """
         return self._user_dict_hidden_data.popitem()
 
-    def pop(self, key):
+    def pop(self, key: HashableT):
         val = self._user_dict_hidden_data[key]
         del self._user_dict_hidden_data[key]
         return val
@@ -317,7 +322,7 @@ class FinalDictObj(DictObj):
     __is_frozen = False
     __frozen_err_msg = 'Cannot modify attribute/item in an already initialized FinalDictObj'
 
-    def __init__(self, in_dict: dict):
+    def __init__(self, in_dict: Dict):
 
         in_dict = deepcopy(in_dict)
 
@@ -563,7 +568,7 @@ class StrKeyIdDict(UserDict):
         del self.data[str(key)]
 
     @classmethod
-    def fromkeys(cls, iterable, value=None):
+    def fromkeys(cls, iterable: List[HashableT], value=None):
         d = cls()
         for key in iterable:
             d[key] = value
