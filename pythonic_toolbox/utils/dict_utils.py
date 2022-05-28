@@ -257,7 +257,7 @@ class DictObj(MyUserDict):
         """
         return self._user_dict_hidden_data.popitem()
 
-    def pop(self, key: HashableT):
+    def pop(self, key):
         val = self._user_dict_hidden_data[key]
         del self._user_dict_hidden_data[key]
         return val
@@ -568,7 +568,7 @@ class StrKeyIdDict(UserDict):
         del self.data[str(key)]
 
     @classmethod
-    def fromkeys(cls, iterable: List[HashableT], value: Optional[Any] = None):
+    def fromkeys(cls, iterable, value=None):
         d = cls()
         for key in iterable:
             d[key] = value
