@@ -5,7 +5,6 @@ from typing import List, Iterable, Union, Optional, Callable, TypeVar, Any, Tupl
 from funcy import first, identity
 
 T = TypeVar("T")
-D = TypeVar("D")  # type for default value
 
 
 def sort_with_custom_orders(values: List[T],
@@ -97,7 +96,7 @@ def sort_with_custom_orders(values: List[T],
 
 def until(values: Optional[Union[List[T], Iterable]],
           terminate: Optional[Callable[[T], bool]] = None,
-          default: Optional[D] = None) -> Optional[Union[T, D]]:
+          default: Optional[T] = None) -> Optional[T]:
     class Empty:
         pass
 
