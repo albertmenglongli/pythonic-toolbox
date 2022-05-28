@@ -568,7 +568,7 @@ class StrKeyIdDict(UserDict):
         del self.data[str(key)]
 
     @classmethod
-    def fromkeys(cls, iterable: List[HashableT], value=None):
+    def fromkeys(cls, iterable: List[HashableT], value: Optional[Any] = None):
         d = cls()
         for key in iterable:
             d[key] = value
