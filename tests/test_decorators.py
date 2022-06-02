@@ -62,6 +62,7 @@ def test_retry():
     # use decorator without any arguments, using retry default params
     @retry
     def func_fail_first_time():
+        """func_fail_first_time"""
         self = func_fail_first_time
         if not hasattr(self, 'call_times'):
             # set attribute call_times for function, to count call times
@@ -73,9 +74,11 @@ def test_retry():
 
     assert func_fail_first_time() == 'ok'
     assert func_fail_first_time.call_times == 2
+    assert func_fail_first_time.__doc__ == 'func_fail_first_time'
 
-    @retry(2, delay=0.1)  # use decorator with customized params
+    @retry(tries=2, delay=0.1)  # use decorator with customized params
     def func_fail_twice():
+        """func_fail_twice"""
         self = func_fail_twice
         if not hasattr(self, 'call_times'):
             self.call_times = 0
@@ -86,9 +89,11 @@ def test_retry():
 
     assert func_fail_twice() == 'ok'
     assert func_fail_twice.call_times == 3
+    assert func_fail_twice.__doc__ == 'func_fail_twice'
 
-    @retry(2, delay=0.1)
+    @retry(tries=2, delay=0.1)
     def func_fail_three_times():
+        """func_fail_three_times"""
         self = func_fail_three_times
         if not hasattr(self, 'call_times'):
             self.call_times = 0
@@ -104,9 +109,21 @@ def test_retry():
 
     import asyncio
 
-    @retry(delay=0.1)
+    @retry
     async def async_func_fail_first_time():
+        """async_func_fail_first_time"""
         self = async_func_fail_first_time
+        if not hasattr(self, 'call_times'):
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times == 1:
+            raise Exception('Fail when first called')
+        return 'ok'
+
+    @retry(delay=0.1)
+    async def async_func_fail_first_time2():
+        """async_func_fail_first_time2"""
+        self = async_func_fail_first_time2
         if not hasattr(self, 'call_times'):
             self.call_times = 0
         self.call_times += 1
@@ -116,7 +133,11 @@ def test_retry():
 
     async def async_main():
         assert await async_func_fail_first_time() == 'ok'
+        assert async_func_fail_first_time.__doc__ == 'async_func_fail_first_time'
         assert async_func_fail_first_time.call_times == 2
+        assert await async_func_fail_first_time2() == 'ok'
+        assert async_func_fail_first_time2.call_times == 2
+        assert async_func_fail_first_time2.__doc__ == 'async_func_fail_first_time2'
 
     loop = asyncio.get_event_loop()
     try:
