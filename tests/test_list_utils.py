@@ -115,3 +115,34 @@ def test_unpack_list():
 
     empty = unpack_list(['a', 'b'], target_num=0, default=None)
     assert empty == []
+
+
+def test_filter_allowable():
+    from pythonic_toolbox.utils.list_utils import filter_allowable
+
+    fruits = ['apple', 'banana', 'orange']
+    vegetables = ['carrot', 'potato', 'tomato']
+    meats = ['beef', 'chicken', 'fish']
+
+    foods = fruits + vegetables + meats
+
+    assert list(filter_allowable(foods)) == foods
+    assert list(filter_allowable(foods, allow_list=[], block_list=[])) == foods
+    assert list(filter_allowable(foods, allow_list=['apple', 'banana', 'blueberry'])) == ['apple', 'banana']
+    assert list(filter_allowable(foods, allow_list=[], block_list=foods)) == []
+    assert list(filter_allowable(foods, block_list=meats)) == fruits + vegetables
+    assert list(filter_allowable(foods, allow_list=['apple'], block_list=[])) == ['apple']
+    assert list(filter_allowable(foods, allow_list=['apple'], block_list=['apple'])) == []
+    assert list(filter_allowable(foods + ['blueberry'], allow_list=[], block_list=foods)) == ['blueberry']
+    assert list(filter_allowable(['blueberry'], allow_list=[], block_list=[])) == ['blueberry']
+    assert list(filter_allowable(['blueberry'], allow_list=[], block_list=['apple', 'banana'])) == ['blueberry']
+    assert list(filter_allowable(['blueberry'], allow_list=['orange'], block_list=['apple', 'banana'])) == []
+
+    # test cases with parameter key
+    assert list(filter_allowable(foods, allow_list=['a', 'b'], key=lambda x: x[0])) == ['apple', 'banana', 'beef']
+
+    # test some basic cases
+    assert list(filter_allowable()) == []
+    assert list(filter_allowable(candidates=None)) == []
+    assert list(filter_allowable(candidates=[])) == []
+    assert list(filter_allowable(candidates=[], allow_list=[], block_list=[])) == []

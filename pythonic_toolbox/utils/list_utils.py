@@ -124,3 +124,30 @@ def until(values: Optional[Union[List[T], Iterable]],
 
 def unpack_list(source: List[Any], target_num: int, default: Optional[Any] = None) -> List[Any]:
     return [*source, *([default] * (target_num - len(source)))] if len(source) < target_num else source[:target_num]
+
+
+def filter_allowable(candidates: Optional[List[Any]] = None,
+                     allow_list: Optional[List[T]] = None,
+                     block_list: [List[T]] = None,
+                     key: Optional[Callable[..., Any]] = None) -> Iterable[Any]:
+    if key is None:
+        key = identity
+    allow_list = allow_list or set()
+    block_list = block_list or set()
+
+    allow_list = set(allow_list)
+    block_list = set(block_list)
+
+    if candidates is None:
+        candidates = []
+
+    candidates = list(candidates)
+    candidates = iter(candidates)
+
+    if block_list:
+        candidates = filter(lambda x: key(x) not in block_list, candidates)
+
+    if allow_list:
+        candidates = filter(lambda x: key(x) in allow_list, candidates)
+
+    return candidates
