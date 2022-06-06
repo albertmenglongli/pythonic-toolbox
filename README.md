@@ -392,13 +392,16 @@ with pytest.raises(AttributeError) as __:
 from copy import deepcopy
 obj = DictObj({'languages': ['Chinese', 'English']})
 copied_obj = deepcopy(obj)
+assert copied_obj == obj
 copied_obj.languages = obj.languages + ['Japanese']
 assert obj.languages == ['Chinese', 'English']
 assert copied_obj.languages == ['Chinese', 'English', 'Japanese']
+assert copied_obj != obj
 
 person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
 
 person = DictObj(person_dct)
+assert DictObj(person_dct) == DictObj(person_dct)
 assert person.to_dict() == person_dct
 assert set(person.keys()) == {'name', 'age', 'sex', 'languages'}
 assert hasattr(person, 'name') is True
@@ -444,6 +447,8 @@ chessboard_data = {
     ]
 }
 chessboard_obj = DictObj(chessboard_data)
+# test comparing instances of DictObj
+assert DictObj(chessboard_data) == DictObj(chessboard_data)
 assert isinstance(chessboard_obj.position, list)
 assert len(chessboard_obj.position) == 2
 assert isinstance(chessboard_obj.position[0][0], DictObj)
@@ -510,6 +515,8 @@ chessboard_data = {
     ]
 }
 chessboard_obj = FinalDictObj(chessboard_data)
+# test comparing instances of FinalDictObj
+assert FinalDictObj(chessboard_data) == FinalDictObj(chessboard_data)
 assert isinstance(chessboard_obj.position, tuple)
 assert isinstance(chessboard_obj.position[0][0], FinalDictObj)
 assert chessboard_obj.position[1][1].name == 'queen'
@@ -569,6 +576,19 @@ assert range_key_dict[1] == '1'
 assert range_key_dict[10] == 'val-between-10-and-100'
 assert range_key_dict[50] == 'val-between-10-and-100'
 assert range_key_dict.get(200, 'N/A') == 'N/A'
+
+# test comparing instances of the class
+assert range_key_dict == RangeKeyDict({
+    0: '0',
+    1: '1',
+    (10, 100): 'val-between-10-and-100'
+})
+
+assert range_key_dict != RangeKeyDict({
+    0: '0',
+    1: '1.0',  # this value is changed from 1 to 1.0
+    (10, 100): 'val-between-10-and-100'
+})
 
 # validate input keys types and detect range overlaps(segment intersect)
 with pytest.raises(ValueError) as exec_info:
@@ -645,6 +665,13 @@ assert my_dict['4'] == 'd'
 my_dict.update({4: 'd'})
 assert my_dict['4'] == 'd'
 
+# test comparing instances of the class
+assert StrKeyIdDict(data) == StrKeyIdDict(data)
+assert StrKeyIdDict(data) != StrKeyIdDict(dict(data, **{'4': 'd'}))
+assert StrKeyIdDict(data) == {'1': 'a', '2': 'b', '3': 'c'}
+assert StrKeyIdDict(data) != {'1': 'a', '2': 'b', '3': 'd'}
+assert StrKeyIdDict(data) != {1: 'a', 2: 'b', 3: 'c'}  # StrKeyIdDict assumes all keys are strings
+
 # test delete key
 del my_dict[4]
 assert my_dict.keys() == {'1', '2', '3'}  # '4' is not in the dict anymore
@@ -699,6 +726,11 @@ assert my_dict['1'] == my_dict[1] == 'a'
 my_dict = StrKeyIdDict(my_dict)
 assert my_dict == {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
 assert dict(my_dict) == {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
+
+my_dict = StrKeyIdDict({'data': 'oops', '1': 'a'})
+# test case when key is data, which is a reserved keyword inside StrKeyIdDict
+assert my_dict['data'] == 'oops'
+assert my_dict['1'] == 'a'
 
 ```
 

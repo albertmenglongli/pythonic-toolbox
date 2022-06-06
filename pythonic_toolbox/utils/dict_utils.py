@@ -2,7 +2,7 @@ import functools
 import numbers
 from bisect import bisect_left
 from collections import UserDict, namedtuple
-from collections.abc import MutableMapping
+from collections.abc import MutableMapping, Mapping
 from copy import deepcopy
 from operator import attrgetter
 from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence, Set
@@ -295,6 +295,15 @@ class DictObj(MyUserDict):
         except KeyError:
             raise AttributeError
 
+    def __eq__(self, other: 'DictObj') -> bool:
+        if isinstance(other, DictObj):
+            return self._user_dict_hidden_data == other._user_dict_hidden_data
+        return False
+
+    def __hash__(self):
+        """not hashable"""
+        return None
+
     def to_dict(self):
         result = {}
         for key, item in self._user_dict_hidden_data.items():
@@ -397,6 +406,13 @@ class RangeKeyDict:
         def __repr__(self):
             return f'RangeKeyDict.Segment(begin={repr(self.begin)}, end={repr(self.end)}, val={repr(self.val)}'
 
+        def __eq__(self, other: 'RangeKeyDict.Segment') -> bool:
+            return self.begin == other.begin and self.end == other.end and self.val == other.val
+
+        def __hash__(self):
+            """not hashable"""
+            return None
+
     def __init__(self, input_dict: Dict[Union[Tuple[K, K], K], V]) -> None:
         """keys for input dict must be tuple-like intervals (left-closed, right-open) or single point"""
         # input validation and generate inner-used structures
@@ -476,6 +492,13 @@ class RangeKeyDict:
         sort_and_validate_segments_overlap(segments)
 
         return single_point_map, left_boundary_key_segment_map, segments
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, RangeKeyDict):
+            return False
+        return (self._single_point_map == other._single_point_map and
+                self._left_boundary_segment_map == other._left_boundary_segment_map and
+                self._sorted_segments == other._sorted_segments)
 
     def __getitem__(self, number):
         if number in self._single_point_map:
@@ -566,6 +589,20 @@ class StrKeyIdDict(UserDict):
 
     def __delitem__(self, key):
         del self.data[str(key)]
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, StrKeyIdDict):
+            return self.data == other.data
+        if isinstance(other, Mapping) and len(other) == len(self):
+            for key, val in self.items():
+                if key not in other or other[key] != val:
+                    return False
+            return True
+        return False
+
+    def __hash__(self):
+        """not hashable"""
+        return None
 
     @classmethod
     def fromkeys(cls, iterable, value=None):
