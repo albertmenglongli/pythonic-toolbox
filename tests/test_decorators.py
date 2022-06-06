@@ -44,6 +44,16 @@ def test_ignore_unexpected_kwargs():
             self.age = age
             self.sex = sex
 
+        @classmethod
+        @ignore_unexpected_kwargs
+        def create(cls, name, age, sex):
+            return cls(name, age, sex)
+
+        @staticmethod
+        @ignore_unexpected_kwargs
+        def greetings(name):
+            return f'Hello, I am {name}'
+
     params = {
         'name': 'albert',
         'age': 34,
@@ -52,6 +62,10 @@ def test_ignore_unexpected_kwargs():
     }
     __ = Person(**params)
     __ = Person('albert', 35, 'male', height='170cm')
+
+    # test cases for classmethod, staticmethod
+    __ = Person.create(**params)
+    assert Person.greetings(**params)
 
 
 def test_retry():
