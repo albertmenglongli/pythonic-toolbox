@@ -462,14 +462,13 @@ class RangeKeyDict:
                 try:
                     if (isinstance(left_boundary_key, Hashable) and
                             isinstance(right_boundary_key, Hashable) and
-                            (left_boundary_key < right_boundary_key or
-                             left_boundary_key == right_boundary_key)):
+                            left_boundary_key < right_boundary_key):
                         boundary_keys.extend([left_boundary_key, right_boundary_key])
                     else:
                         raise ValueError
                 except (TypeError, ValueError):
                     raise ValueError(f'Invalid key for {repr(key)}, '
-                                     f'left boundary keys must <= right boundary key, '
+                                     f'left boundary key must < right boundary key, '
                                      f'and both of them must be hashable, have completed comparison methods')
             elif not isinstance(key, tuple) and isinstance(key, Hashable):
                 single_point_map[key] = val

@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.1.27'
+version = '1.1.28'
 
 long_description = 'A toolbox' \
                    ' containing multi useful pythonic utils, functions, decorators etc.'

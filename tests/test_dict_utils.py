@@ -371,8 +371,7 @@ def test_RangeKeyDict():
         (70, 80): 'C',  # 70 <= val < 80
         (80, 90): 'B',  # 80 <= val < 90
         (90, 100): 'A',  # 90 <= val < 100
-        (100, 100): 'A+',  # val == 100,
-        # 100: 'A+',  # val == 100, same as previous line
+        100: 'A+',  # val == 100
     })
 
     # Big O of querying is O(log n), n is the number of ranges, due to using bisect inside
@@ -395,31 +394,19 @@ def test_RangeKeyDict():
 
     assert range_key_dict.get(150, 'N/A') == 'N/A'
 
-    # combine range-key and fixed-point key together
-    range_key_dict = RangeKeyDict({
-        0: '0',
-        1: '1',
-        (10, 100): 'val-between-10-and-100'
-    })
+    # test comparison with other RangeKeyDict
+    assert RangeKeyDict({(0, 10): '1'}) == RangeKeyDict({(0, 10): '1'})
+    assert RangeKeyDict({(0, 10): '1'}) != RangeKeyDict({(0, 10): '2'})
+    assert RangeKeyDict({(0, 10): '1'}) != RangeKeyDict({(0, 1000): '1'})
 
-    assert range_key_dict[0] == '0'
-    assert range_key_dict[1] == '1'
-    assert range_key_dict[10] == 'val-between-10-and-100'
-    assert range_key_dict[50] == 'val-between-10-and-100'
-    assert range_key_dict.get(200, 'N/A') == 'N/A'
+    with pytest.raises(ValueError):
+        # [1, 1) is not a valid range
+        # there's no value x satisfy 1 <= x < 1
+        RangeKeyDict({(1, 1): '1'})
 
-    # test comparing instances of the class
-    assert range_key_dict == RangeKeyDict({
-        0: '0',
-        1: '1',
-        (10, 100): 'val-between-10-and-100'
-    })
-
-    assert range_key_dict != RangeKeyDict({
-        0: '0',
-        1: '1.0',  # this value is changed from 1 to 1.0
-        (10, 100): 'val-between-10-and-100'
-    })
+    with pytest.raises(ValueError):
+        # [1, -1) is not a valid range
+        RangeKeyDict({(1, -1): '1'})
 
     # validate input keys types and detect range overlaps(segment intersect)
     with pytest.raises(ValueError) as exec_info:
