@@ -2,7 +2,7 @@ import re
 from collections import deque
 from itertools import chain
 from string import Template
-from typing import Any, List, Set, Dict, Hashable
+from typing import Any, List, Set, Dict
 import sys
 import funcy
 
@@ -13,7 +13,7 @@ if sys.version_info >= (3, 9):
     from graphlib import CycleError, TopologicalSorter
 
 
-    def topological_sort_static_order(graph) -> List[str]:
+    def _topological_sort_static_order(graph) -> List:
         ts = TopologicalSorter(graph)
         res = list(ts.static_order())
         return res
@@ -22,7 +22,7 @@ else:
         pass
 
 
-    def topological_sort_static_order(graph) -> List[Hashable]:
+    def _topological_sort_static_order(graph) -> List:
         gray, black = 0, 1
         order, enter, state = deque(), set(graph), {}
 
@@ -78,7 +78,7 @@ def substitute_string_template_dict(string_template_dict: Dict[str, Any],
     identifier_dependency_graph = {item[0]: extract_identifiers(item[1])
                                    for item in string_template_dict.items()}
 
-    top_sorted_identifiers = topological_sort_static_order(identifier_dependency_graph)
+    top_sorted_identifiers = _topological_sort_static_order(identifier_dependency_graph)
 
     for identifier in top_sorted_identifiers:
         if identifier in string_template_dict.keys():
