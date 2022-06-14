@@ -427,13 +427,11 @@ def test_RangeKeyDict():
                           "(0, 10): 'val-between-0-and-10', (5, 15): 'val-between-5-and-15'")
     assert exec_info.value.args[0] == expected_error_msg
 
-    from typing import Union
-
     from functools import total_ordering
 
     @total_ordering
     class Age:
-        def __init__(self, val: Union[int, float]):
+        def __init__(self, val: float):
             if not isinstance(val, (int, float)):
                 raise ValueError('Invalid age value')
             self.val = val
@@ -447,7 +445,7 @@ def test_RangeKeyDict():
         def __hash__(self):
             return hash(self.val)
 
-    age_categories_map = RangeKeyDict({
+    age_categories_map: RangeKeyDict[Age, str] = RangeKeyDict({
         (Age(0), Age(2)): 'Baby',
         (Age(2), Age(15)): 'Children',
         (Age(15), Age(25)): 'Youth',

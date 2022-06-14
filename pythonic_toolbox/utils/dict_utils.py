@@ -5,8 +5,9 @@ from collections import UserDict, namedtuple
 from collections.abc import MutableMapping, Mapping
 from copy import deepcopy
 from operator import attrgetter
-from typing import Any, Callable, Dict, Generic, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence, \
-    Set
+from typing import (Any, Callable, Dict, Generic, Hashable, Iterator,
+                    List, Optional, Tuple, TypeVar, Union, Sequence,
+                    Set)
 
 T = TypeVar("T")
 KT = TypeVar("KT")
