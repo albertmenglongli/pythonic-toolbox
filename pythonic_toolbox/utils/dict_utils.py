@@ -5,11 +5,12 @@ from collections import UserDict, namedtuple
 from collections.abc import MutableMapping, Mapping
 from copy import deepcopy
 from operator import attrgetter
-from typing import Any, Callable, Dict, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence, Set
+from typing import Any, Callable, Dict, Generic, Hashable, Iterator, List, Optional, Tuple, TypeVar, Union, Sequence, \
+    Set
 
 T = TypeVar("T")
-K = TypeVar("K")
-V = TypeVar("V")
+KT = TypeVar("KT")
+VT = TypeVar("VT")
 HashableT = TypeVar("HashableT", bound=Hashable)
 
 
@@ -151,7 +152,7 @@ def walk_leaves(data: Optional[Union[Dict, List]] = None,
     return obj if inplace is False else None
 
 
-class MyUserDict(MutableMapping):
+class _MyUserDict(MutableMapping):
 
     # Start by filling-out the abstract methods
     def __init__(*args, **kwargs):
@@ -224,7 +225,7 @@ class MyUserDict(MutableMapping):
         return d
 
 
-class DictObj(MyUserDict):
+class DictObj(_MyUserDict):
     def __init__(self, in_dict: Dict):
 
         in_dict = deepcopy(in_dict)
@@ -390,7 +391,7 @@ class FinalDictObj(DictObj):
         super(FinalDictObj, self).update(*args, **kwargs)
 
 
-class RangeKeyDict:
+class RangeKeyDict(Generic[KT, VT]):
     """
     RangeKeyDict uses tuple of key pairs to present range keys, notice that the range is left-closed/right-open
     [min, max): min <= key < max, Big O of querying is O(log n), n is the number of ranges, due to using bisect inside
@@ -413,7 +414,7 @@ class RangeKeyDict:
             """not hashable"""
             return None
 
-    def __init__(self, input_dict: Dict[Union[Tuple[K, K], K], V]) -> None:
+    def __init__(self, input_dict: Dict[Union[Tuple[KT, KT], KT], VT]) -> None:
         """keys for input dict must be tuple-like intervals (left-closed, right-open) or single point"""
         # input validation and generate inner-used structures
         single_point_map, left_boundary_map, sorted_segments = self._gen_inner_structures_and_validate_inputs(
@@ -424,9 +425,9 @@ class RangeKeyDict:
         self._sorted_segments = sorted_segments
 
     @staticmethod
-    def _gen_inner_structures_and_validate_inputs(input_dict: Dict[Union[Tuple[K, K], K], V]) -> Tuple[
-        Dict[K, V], Dict[K, Segment], Sequence[Segment]]:
-        def validate_boundary_key_type(boundary_key_lst: List[K]):
+    def _gen_inner_structures_and_validate_inputs(input_dict: Dict[Union[Tuple[KT, KT], KT], VT]) -> Tuple[
+        Dict[KT, VT], Dict[KT, Segment], Sequence[Segment]]:
+        def validate_boundary_key_type(boundary_key_lst: List[KT]):
             if boundary_key_lst:
                 if all(map(lambda x: isinstance(x, numbers.Number), boundary_key_lst)):
                     # if all the boundaries are numbers, OK
@@ -452,9 +453,9 @@ class RangeKeyDict:
                     if prev.end > cur.begin or prev.begin == prev.end == cur.begin:
                         raise ValueError(f'Overlap detected: {str(prev)}, {str(cur)}')
 
-        boundary_keys: List[K] = list()
-        single_point_map: Dict[K, V] = dict()
-        left_boundary_key_segment_map: Dict[K, RangeKeyDict.Segment] = dict()
+        boundary_keys: List[KT] = list()
+        single_point_map: Dict[KT, VT] = dict()
+        left_boundary_key_segment_map: Dict[KT, RangeKeyDict.Segment] = dict()
         segments: List[RangeKeyDict.Segment] = list()
         for key, val in input_dict.items():
             if isinstance(key, tuple) and len(key) == 2:

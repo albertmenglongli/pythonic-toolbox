@@ -364,7 +364,7 @@ def test_RangeKeyDict():
     from pythonic_toolbox.utils.dict_utils import RangeKeyDict
 
     # test normal case
-    range_key_dict = RangeKeyDict({
+    range_key_dict: RangeKeyDict[float, str] = RangeKeyDict({
         (float('-inf'), 0): 'Negative',
         (0, 60): 'F',  # 0 <= val < 60
         (60, 70): 'D',  # 60 <= val < 70
