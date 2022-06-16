@@ -71,7 +71,6 @@ pip3 install pythonic-toolbox --upgrade
 import itertools
 
 import pytest
-
 from pythonic_toolbox.utils.context_utils import SkipContext
 
 # Usage: define a class that inherits the SkipContext,
