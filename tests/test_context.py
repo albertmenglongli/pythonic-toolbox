@@ -1,5 +1,6 @@
 def test_SkipContext():
     import itertools
+
     import pytest
 
     from pythonic_toolbox.utils.context_utils import SkipContext

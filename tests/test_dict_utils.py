@@ -192,8 +192,9 @@ def test_walk_leaves():
 
 
 def test_DictObj():
-    import pytest
+    from copy import deepcopy
 
+    import pytest
     from pythonic_toolbox.utils.dict_utils import DictObj
 
     naive_dct = {
@@ -226,7 +227,6 @@ def test_DictObj():
         del obj.key5
 
     # test deepcopy
-    from copy import deepcopy
     obj = DictObj({'languages': ['Chinese', 'English']})
     copied_obj = deepcopy(obj)
     assert copied_obj == obj
@@ -311,9 +311,9 @@ def test_DictObj():
 
 
 def test_FinalDictObj():
-    import pytest
     from typing import cast
 
+    import pytest
     from pythonic_toolbox.utils.dict_utils import FinalDictObj
 
     person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
@@ -360,7 +360,6 @@ def test_FinalDictObj():
 
 def test_RangeKeyDict():
     import pytest
-
     from pythonic_toolbox.utils.dict_utils import RangeKeyDict
 
     # test normal case
@@ -462,7 +461,6 @@ def test_RangeKeyDict():
 
 def test_StrKeyIdDict():
     import pytest
-
     from pythonic_toolbox.utils.dict_utils import StrKeyIdDict
 
     data = {1: 'a', 2: 'b', '3': 'c'}

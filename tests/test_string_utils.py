@@ -1,4 +1,6 @@
 def test_substitute_string_template_dict():
+    from unittest.mock import patch, PropertyMock
+
     import pytest
     from pythonic_toolbox.utils.string_utils import substitute_string_template_dict, CycleError
 
@@ -45,8 +47,6 @@ def test_substitute_string_template_dict():
             if isinstance(item, str) and item.startswith('title') and item[len(item) - 1:].isdigit():
                 return 'UnknownTitle'
             return super(DefaultUnknownTitle, self).__getattribute__(item)
-
-    from unittest.mock import patch, PropertyMock
 
     expected_speech = ("Dany: I'm Daenerys Targaryen (Queen of Meereen, Mother of Dragons, UnknownTitle), "
                        "it's 08:00:00, good morning everyone!")

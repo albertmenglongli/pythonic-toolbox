@@ -69,6 +69,7 @@ pip3 install pythonic-toolbox --upgrade
 
 ```python3
 import itertools
+
 import pytest
 
 from pythonic_toolbox.utils.context_utils import SkipContext
@@ -138,7 +139,6 @@ assert exec_info.value.args[0] == 'MyError'
 
 ```python3
 import pytest
-
 from pythonic_toolbox.decorators.common import ignore_unexpected_kwargs
 
 # Following functions are named under Metasyntactic Variables, like:
@@ -307,9 +307,9 @@ finally:
 #### deque_pop_any
 
 ```python3
-import pytest
 from collections import deque
 
+import pytest
 from pythonic_toolbox.utils.deque_utils import deque_pop_any
 
 queue = deque([1, 2, 3, 4, 5])
@@ -342,6 +342,7 @@ assert exec_info.value.args[0] == 'pop from empty deque'
 
 ```python3
 import pytest
+
 from collections import deque
 
 from pythonic_toolbox.utils.deque_utils import deque_split
@@ -369,8 +370,9 @@ assert exec_info.value.args[0] == 'num must be integer: 0 <= num <= sys.maxsize'
 #### DictObj
 
 ```python3
-import pytest
+from copy import deepcopy
 
+import pytest
 from pythonic_toolbox.utils.dict_utils import DictObj
 
 naive_dct = {
@@ -403,7 +405,6 @@ with pytest.raises(AttributeError) as __:
     del obj.key5
 
 # test deepcopy
-from copy import deepcopy
 obj = DictObj({'languages': ['Chinese', 'English']})
 copied_obj = deepcopy(obj)
 assert copied_obj == obj
@@ -491,9 +492,9 @@ with pytest.raises(ValueError) as __:
 #### FinalDictObj
 
 ```python3
-import pytest
 from typing import cast
 
+import pytest
 from pythonic_toolbox.utils.dict_utils import FinalDictObj
 
 person_dct = {'name': 'Albert', 'age': '34', 'sex': 'Male', 'languages': ['Chinese', 'English']}
@@ -543,7 +544,6 @@ with pytest.raises(RuntimeError) as __:
 
 ```python3
 import pytest
-
 from pythonic_toolbox.utils.dict_utils import RangeKeyDict
 
 # test normal case
@@ -648,7 +648,6 @@ assert age_categories_map[Age(70)] == 'Seniors'
 
 ```python3
 import pytest
-
 from pythonic_toolbox.utils.dict_utils import StrKeyIdDict
 
 data = {1: 'a', 2: 'b', '3': 'c'}
@@ -1143,6 +1142,7 @@ with pytest.raises(ValueError):
 
 ```python3
 from itertools import count
+
 from pythonic_toolbox.utils.list_utils import until
 
 # basic usage
@@ -1162,6 +1162,8 @@ assert until(None, lambda x: x > 10, default=11) == 11
 #### substitute_string_template_dict
 
 ```python3
+from unittest.mock import patch, PropertyMock
+
 import pytest
 from pythonic_toolbox.utils.string_utils import substitute_string_template_dict, CycleError
 
@@ -1208,8 +1210,6 @@ class DefaultUnknownTitle:
         if isinstance(item, str) and item.startswith('title') and item[len(item) - 1:].isdigit():
             return 'UnknownTitle'
         return super(DefaultUnknownTitle, self).__getattribute__(item)
-
-from unittest.mock import patch, PropertyMock
 
 expected_speech = ("Dany: I'm Daenerys Targaryen (Queen of Meereen, Mother of Dragons, UnknownTitle), "
                    "it's 08:00:00, good morning everyone!")

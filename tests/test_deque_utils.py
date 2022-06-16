@@ -1,5 +1,6 @@
 def test_deque_split():
     import pytest
+
     from collections import deque
 
     from pythonic_toolbox.utils.deque_utils import deque_split
@@ -22,9 +23,9 @@ def test_deque_split():
 
 
 def test_deque_pop_any():
-    import pytest
     from collections import deque
 
+    import pytest
     from pythonic_toolbox.utils.deque_utils import deque_pop_any
 
     queue = deque([1, 2, 3, 4, 5])

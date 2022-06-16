@@ -1,5 +1,6 @@
 def test_until():
     from itertools import count
+
     from pythonic_toolbox.utils.list_utils import until
 
     # basic usage

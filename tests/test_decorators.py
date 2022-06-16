@@ -1,6 +1,5 @@
 def test_ignore_unexpected_kwargs():
     import pytest
-
     from pythonic_toolbox.decorators.common import ignore_unexpected_kwargs
 
     # Following functions are named under Metasyntactic Variables, like:
