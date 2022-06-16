@@ -89,32 +89,61 @@ def test_sort_with_custom_orders():
 
 
 def test_unpack_list():
+    import pytest
     from pythonic_toolbox.utils.list_utils import unpack_list
 
     first, second, third = unpack_list(['a', 'b', 'c', 'd'], target_num=3)
-    assert first == 'a'
-    assert second == 'b'
-    assert third == 'c'
+    assert first == 'a' and second == 'b' and third == 'c'
 
     first, second, third = unpack_list(['a', 'b'], target_num=3, default=None)
-    assert first == 'a'
-    assert second == 'b'
-    assert third is None
+    assert first == 'a' and second == 'b' and third is None
+
+    first, second, third = unpack_list(range(1, 3), target_num=3, default=None)
+    assert first == 1 and second == 2 and third is None
 
     first, second, third = unpack_list([], target_num=3, default=0)
     assert first == second == third == 0
 
     first, second, *rest = unpack_list(['a', 'b', 'c'], target_num=4, default='x')
-    assert first == 'a'
-    assert second == 'b'
-    assert rest == ['c', 'x']
+    assert first == 'a' and second == 'b' and rest == ['c', 'x']
+
+    # test case for type range
+    first, second, third = unpack_list(range(1, 3), target_num=3, default=None)
+    assert first == 1 and second == 2 and third is None
+
+    def fib():
+        a, b = 0, 1
+        while 1:
+            yield a
+            a, b = b, a + b
+
+    # test case for type generator
+    fib_generator = fib()  # generates data like [0, 1, 1, 2, 3, 5, 8, 13, 21 ...]
+    first, second, third, *rest = unpack_list(fib_generator, target_num=6)
+    assert first == 0 and second == 1 and third == 1
+    assert rest == [2, 3, 5]
+    seventh, eighth = unpack_list(fib_generator, target_num=2)
+    assert seventh == 8 and eighth == 13
 
     # test edge case, nothing to unpack
     empty = unpack_list([], target_num=0, default=None)
     assert empty == []
 
+    res = unpack_list([], target_num=2, default=None)
+    assert res == [None, None]
+
     empty = unpack_list(['a', 'b'], target_num=0, default=None)
     assert empty == []
+
+    empty = unpack_list(range(0, 0), target_num=0)
+    assert empty == []
+
+    empty = unpack_list(iter([]), target_num=0, default=None)
+    assert empty == []
+
+    with pytest.raises(ValueError):
+        # ValueError: not enough values to unpack (expected 3, got 2)
+        first, second, third = unpack_list([1, 2], target_num=2)
 
 
 def test_filter_allowable():

@@ -1,6 +1,8 @@
 import json
 from collections import defaultdict
-from typing import List, Iterable, Union, Optional, Callable, TypeVar, Any, Tuple, DefaultDict, Hashable
+from functools import singledispatch
+from typing import (List, Iterable, Generator, Union, Optional, Callable,
+                    TypeVar, Any, Tuple, DefaultDict, Hashable, overload)
 
 from funcy import first, identity
 
@@ -122,7 +124,38 @@ def until(values: Optional[Union[List[T], Iterable]],
         raise ValueError('values type should be list, Iterable')
 
 
+@overload
 def unpack_list(source: List[Any], target_num: int, default: Optional[Any] = None) -> List[Any]:
+    pass
+
+
+@overload
+def unpack_list(source: Union[Generator, Iterable, range], target_num: int, default: Optional[Any] = None) -> List[Any]:
+    pass
+
+
+@singledispatch
+def unpack_list(source: Union[Generator, Iterable, range], target_num: int, default: Optional[Any] = None) -> List[Any]:
+    source_iter = iter(source)
+    res = []
+    cnt = 0
+    try:
+        while cnt < target_num:
+            tmp = next(source_iter)
+            res.append(tmp)
+            cnt += 1
+    except StopIteration:
+        pass
+
+    while cnt < target_num:
+        res.append(default)
+        cnt += 1
+
+    return res
+
+
+@unpack_list.register(List)
+def _(source: List[Any], target_num: int, default: Optional[Any] = None) -> List[Any]:
     return [*source, *([default] * (target_num - len(source)))] if len(source) < target_num else source[:target_num]
 
 
