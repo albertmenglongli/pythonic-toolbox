@@ -154,7 +154,7 @@ def unpack_list(source: Union[Generator, Iterable, range], target_num: int, defa
     return res
 
 
-@unpack_list.register(List)
+@unpack_list.register(list)
 def _(source: List[Any], target_num: int, default: Optional[Any] = None) -> List[Any]:
     return [*source, *([default] * (target_num - len(source)))] if len(source) < target_num else source[:target_num]
 
