@@ -318,14 +318,12 @@ def test_DictObj():
     assert obj_dict['1abc'] == 'Gotcha'
     assert getattr(obj_dict, '1abc') == 'Gotcha'
     # you can access '1abc' as attribute by adding prefix '_'
-    # this is only available when you have '1abc' in your plain dict for creating DictObj instance
     assert obj_dict._1abc == 'Gotcha'
     del obj_dict._1abc
 
     assert obj_dict['class'] == 'MyClass'
     assert getattr(obj_dict, 'class') == 'MyClass'
     # you can access 'class' as attribute by adding prefix '_'
-    # this is only available when you have 'class' in your plain dict for creating DictObj instance
     assert obj_dict._class == 'MyClass'
 
     # test re-assign new value for 'class'
