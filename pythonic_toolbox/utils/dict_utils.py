@@ -4,6 +4,7 @@ from bisect import bisect_left
 from collections import UserDict, namedtuple
 from collections.abc import MutableMapping, Mapping
 from copy import deepcopy
+from keyword import iskeyword
 from operator import attrgetter
 from typing import (Any, Callable, Dict, Generic, Hashable, Iterator,
                     List, Optional, Tuple, TypeVar, Union, Sequence,
@@ -231,10 +232,9 @@ class DictObj(_MyUserDict):
 
         in_dict = deepcopy(in_dict)
 
-        if any(map(lambda key: not isinstance(key, str) or (isinstance(key, str) and not key.isidentifier()),
+        if any(map(lambda key: not isinstance(key, str),
                    in_dict.keys())):
-            raise ValueError('input dict for DictObj/FinalDictObj must have only string keys,'
-                             ' and keys must be valid identifiers')
+            raise ValueError('input dict for DictObj/FinalDictObj must have only string keys')
 
         for key, val in in_dict.items():
             in_dict[key] = self._create_obj_or_keep(val)
@@ -279,14 +279,25 @@ class DictObj(_MyUserDict):
             object.__setattr__(self, '_user_dict_hidden_data', value)
         else:
             data = object.__getattribute__(self, '_user_dict_hidden_data')
+            if len(key) >= 2 and key.startswith('_') and key[1:] in data:
+                # handle case when accessing attribute directly
+                # by adding '_' for keyword/non-identifier attribute
+                key = key[1:]
             data[key] = self._create_obj_or_keep(value)
             object.__setattr__(self, '_user_dict_hidden_data', data)
 
     def __getattr__(self, item):
         try:
-            data = self.__dict__['_user_dict_hidden_data']
-            res = data[item]
+            res = self.__dict__['_user_dict_hidden_data'][item]
         except KeyError:
+            if len(item) >= 2 and item.startswith('_') and not item.startswith('__'):
+                # keyword like attribute can be accessed by adding "_" in prefix
+                new_item = item[1:]
+                if new_item.isidentifier() is False or iskeyword(new_item):
+                    try:
+                        return self.__dict__['_user_dict_hidden_data'][new_item]
+                    except KeyError:
+                        pass
             raise AttributeError(f'AttributeError {item}')
         else:
             return res
@@ -295,6 +306,15 @@ class DictObj(_MyUserDict):
         try:
             del self[item]
         except KeyError:
+            if len(item) >= 2 and item.startswith('_') and not item.startswith('__'):
+                # keyword-like / non-identifier-like attribute can be accessed by adding "_" in prefix
+                new_item = item[1:]
+                if not new_item.isidentifier() or iskeyword(new_item):
+                    try:
+                        del self[new_item]
+                        return
+                    except KeyError:
+                        pass
             raise AttributeError
 
     def __eq__(self, other: 'DictObj') -> bool:

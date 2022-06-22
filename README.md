@@ -479,12 +479,73 @@ assert obj_dict.data == 'oops'
 
 # params validation
 invalid_key_dct = {
-    '1abc': '1',  # '1abc' is a string, but not valid identifier for python, cannot be used as attribute
+    1: '1',
 }
 
-# test when dict's key cannot be used as an identifier
+# test when dict's key is not str
 with pytest.raises(ValueError) as __:
     __ = DictObj(invalid_key_dct)
+
+complicated_key_dct = {
+    '1abc': 'Gotcha',  # '1abc' is not valid identifier for Python, so obj.1abc will cause SyntaxError
+    'class': 'MyClass',  # 'class' is keyword in Python, so obj.class will cause SyntaxError
+}
+
+obj_dict = DictObj(complicated_key_dct)
+assert obj_dict['1abc'] == 'Gotcha'
+assert getattr(obj_dict, '1abc') == 'Gotcha'
+assert obj_dict._1abc == 'Gotcha'
+del obj_dict._1abc
+
+assert obj_dict['class'] == 'MyClass'
+assert getattr(obj_dict, 'class') == 'MyClass'
+assert obj_dict._class == 'MyClass'
+
+obj_dict._class = 'MyClass2'
+assert obj_dict._class == 'MyClass2'
+assert obj_dict['class'] == 'MyClass2'
+assert getattr(obj_dict, 'class') == 'MyClass2'
+del obj_dict._class
+
+# if assign new attributes (_2, _try), will treat it like what they look like originally
+# this is fully considered by design, you're not encouraged to mess up keys
+obj_dict._2x = 'NewAttr'
+assert obj_dict._2x == 'NewAttr'
+assert obj_dict['_2x'] == 'NewAttr'
+with pytest.raises(KeyError):
+    __ = obj_dict['2x']
+with pytest.raises(AttributeError):
+    __ = getattr(obj_dict, '2x')
+
+obj_dict._try = 'NewAttr'
+assert obj_dict._try == 'NewAttr'
+assert obj_dict['_try'] == 'NewAttr'
+with pytest.raises(KeyError):
+    __ = obj_dict['NewAttr']
+with pytest.raises(AttributeError):
+    __ = getattr(obj_dict, 'NewAttr')
+
+# Demo for messing up key 'class'
+# deleting it and re-assigning _class
+complicated_key_dct = {
+    'class': 'MyClass',  # 'class' is keyword in Python, so obj.class will cause SyntaxError
+}
+obj_dict = DictObj(complicated_key_dct)
+
+assert obj_dict['class'] == 'MyClass'
+obj_dict._class = 'MyClass2'
+assert obj_dict['class'] == 'MyClass2'
+del obj_dict._class
+
+# obj_dict has no knowledge about 'class' or '_class'
+# so '_class' is a brand-new attribute, and will be stored as '_class'
+obj_dict._class = 'MyClass3'
+with pytest.raises(KeyError):
+    # Oops!!! by-design
+    # 'class' cannot be accessed as key anymore,
+    # because we store '_class' as key as other valid keys behave
+    assert obj_dict['class'] == 'MyClass3'
+assert obj_dict['_class'] == 'MyClass3'
 
 ```
 
@@ -536,6 +597,14 @@ assert isinstance(chessboard_obj.position[0][0], FinalDictObj)
 assert chessboard_obj.position[1][1].name == 'queen'
 with pytest.raises(RuntimeError) as __:
     chessboard_obj.position[1][1].name = 'knight'
+
+# test for keyword/non-identifier key as attribute
+final_obj_dict = FinalDictObj({
+    'class': 'MyClass',  # 'class' is keyword in Python, so obj.class will cause SyntaxError
+})
+assert final_obj_dict['class'] == 'MyClass'
+assert getattr(final_obj_dict, 'class') == 'MyClass'
+assert final_obj_dict._class == 'MyClass'
 
 ```
 
