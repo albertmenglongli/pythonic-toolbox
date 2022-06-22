@@ -1,9 +1,11 @@
 from setuptools import setup, find_packages
 
-version = '1.1.29'
+version = '1.1.30'
 
-long_description = 'A toolbox' \
-                   ' containing multi useful pythonic utils, functions, decorators etc.'
+# read the contents of your README file
+from pathlib import Path
+
+long_description = (Path(__file__).parent / "README.md").read_text()
 
 url = 'https://github.com/albertmenglongli/pythonic-toolbox'
 
@@ -17,6 +19,7 @@ setup(
 
     description='a toolbox with pythonic utils, tools',
     long_description=long_description,
+    long_description_content_type='text/markdown',
 
     # The project's main homepage.
     url='https://github.com/albertmenglongli/pythonic-toolbox',
