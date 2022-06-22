@@ -317,20 +317,25 @@ def test_DictObj():
     obj_dict = DictObj(complicated_key_dct)
     assert obj_dict['1abc'] == 'Gotcha'
     assert getattr(obj_dict, '1abc') == 'Gotcha'
+    # you can access '1abc' as attribute by adding prefix '_'
+    # this is only available when you have '1abc' in your plain dict for creating DictObj instance
     assert obj_dict._1abc == 'Gotcha'
     del obj_dict._1abc
 
     assert obj_dict['class'] == 'MyClass'
     assert getattr(obj_dict, 'class') == 'MyClass'
+    # you can access 'class' as attribute by adding prefix '_'
+    # this is only available when you have 'class' in your plain dict for creating DictObj instance
     assert obj_dict._class == 'MyClass'
 
+    # test re-assign new value for 'class'
     obj_dict._class = 'MyClass2'
     assert obj_dict._class == 'MyClass2'
     assert obj_dict['class'] == 'MyClass2'
     assert getattr(obj_dict, 'class') == 'MyClass2'
     del obj_dict._class
 
-    # if assign new attributes (_2, _try), will treat it like what they look like originally
+    # if assign new attributes (_2, _try), ObjDict will treat it like what the originally are
     # this is fully considered by design, you're not encouraged to mess up keys
     obj_dict._2x = 'NewAttr'
     assert obj_dict._2x == 'NewAttr'
