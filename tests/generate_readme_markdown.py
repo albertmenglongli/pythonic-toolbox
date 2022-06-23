@@ -48,7 +48,7 @@ A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic 
 pip3 install pythonic-toolbox --upgrade
 ```""")
 
-BADGES = ("""
+BADGES = (f"""
 [![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
 [![Python3.6 Test Status]({BADGE_TEST_PY36_LINK})]({WORKFLOW_TEST_PY36_LINK})
 [![Python3.7 Test Status]({BADGE_TEST_PY37_LINK})]({WORKFLOW_TEST_PY37_LINK})

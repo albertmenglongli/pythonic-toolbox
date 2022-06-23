@@ -1,11 +1,11 @@
 # Pythonic toolbox
 
 [![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
-[![Python3.6 Test Status]({BADGE_TEST_PY36_LINK})]({WORKFLOW_TEST_PY36_LINK})
-[![Python3.7 Test Status]({BADGE_TEST_PY37_LINK})]({WORKFLOW_TEST_PY37_LINK})
-[![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})
-[![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})
-[![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK})
+[![Python3.6 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml)
+[![Python3.7 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml)
+[![Python3.8 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml)
+[![Python3.9 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml)
+[![Python3.10 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml)
 [![SNYK Status](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg)]("https://snyk.io/test/github/albertmenglongli/pythonic-toolbox")
 
 
