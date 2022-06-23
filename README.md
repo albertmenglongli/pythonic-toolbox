@@ -47,13 +47,19 @@ python3 tests/generate_readme_markdown.py
 A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.10 .
 
 
-| Tests | Action |
+| Test | Badge |
 |-----|--------|
-|__Python3.6__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml/badge.svg?branch=master'/></a>       |
-|__Python3.7__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml/badge.svg?branch=master'/></a>       |
-|__Python3.8__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml/badge.svg?branch=master'/></a>       |
-|__Python3.9__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml/badge.svg?branch=master'/></a>       |
-|__Python3.10__| <a href='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml'><img src='https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml/badge.svg?branch=master'/></a>    |
+|__Python3.6__| [![Python3.6 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml)     |
+|__Python3.7__| [![Python3.7 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml)     |
+|__Python3.8__| [![Python3.8 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml)     |
+|__Python3.9__| [![Python3.9 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml)     |
+|__Python3.10__| [![Python3.10 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml) |
+
+
+| Security | Badge |
+|-----|--------|
+|__OSCS__| [![OSCS Status](https://www.oscs1024.com/platform/badge/albertmenglongli/pythonic-toolbox.svg?size=small)](https://www.oscs1024.com/project/albertmenglongli/pythonic-toolbox?ref=badge_small)   |
+
 
 ## Installation
 

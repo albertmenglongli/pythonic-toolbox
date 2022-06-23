@@ -41,13 +41,19 @@ python3 tests/generate_readme_markdown.py
 A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.10 .
 
 
-| Tests | Action |
+| Test | Badge |
 |-----|--------|
-|__Python3.6__| <a href='{WORKFLOW_TEST_PY36_LINK}'><img src='{BADGE_TEST_PY36_LINK}'/></a>       |
-|__Python3.7__| <a href='{WORKFLOW_TEST_PY37_LINK}'><img src='{BADGE_TEST_PY37_LINK}'/></a>       |
-|__Python3.8__| <a href='{WORKFLOW_TEST_PY38_LINK}'><img src='{BADGE_TEST_PY38_LINK}'/></a>       |
-|__Python3.9__| <a href='{WORKFLOW_TEST_PY39_LINK}'><img src='{BADGE_TEST_PY39_LINK}'/></a>       |
-|__Python3.10__| <a href='{WORKFLOW_TEST_PY310_LINK}'><img src='{BADGE_TEST_PY310_LINK}'/></a>    |
+|__Python3.6__| [![Python3.6 Test Status]({BADGE_TEST_PY36_LINK})]({WORKFLOW_TEST_PY36_LINK})     |
+|__Python3.7__| [![Python3.7 Test Status]({BADGE_TEST_PY37_LINK})]({WORKFLOW_TEST_PY37_LINK})     |
+|__Python3.8__| [![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})     |
+|__Python3.9__| [![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})     |
+|__Python3.10__| [![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK}) |
+
+
+| Security | Badge |
+|-----|--------|
+|__OSCS__| [![OSCS Status](https://www.oscs1024.com/platform/badge/albertmenglongli/pythonic-toolbox.svg?size=small)](https://www.oscs1024.com/project/albertmenglongli/pythonic-toolbox?ref=badge_small)   |
+
 
 ## Installation
 
