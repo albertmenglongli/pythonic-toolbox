@@ -1,5 +1,14 @@
 # Pythonic toolbox
 
+[![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
+[![Python3.6 Test Status]({BADGE_TEST_PY36_LINK})]({WORKFLOW_TEST_PY36_LINK})
+[![Python3.7 Test Status]({BADGE_TEST_PY37_LINK})]({WORKFLOW_TEST_PY37_LINK})
+[![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})
+[![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})
+[![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK})
+[![SNYK Status](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg)]("https://snyk.io/test/github/albertmenglongli/pythonic-toolbox")
+
+
 ## Table of Contents
 * [Introduction](#Introduction)
 * [Installation](#Installation)
@@ -45,16 +54,6 @@ python3 tests/generate_readme_markdown.py
 ## Introduction
 
 A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.10 .
-
-
-| Test / Security | Badge |
-|-----|--------|
-|__Python3.6__| [![Python3.6 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml)     |
-|__Python3.7__| [![Python3.7 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml)     |
-|__Python3.8__| [![Python3.8 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml)     |
-|__Python3.9__| [![Python3.9 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml)     |
-|__Python3.10__| [![Python3.10 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml) |
-
 
 ## Installation
 

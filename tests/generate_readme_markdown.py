@@ -18,12 +18,14 @@ WORKFLOW_TEST_PY37_LINK = f"{URL_PREFIX}/tests-python37.yml"
 WORKFLOW_TEST_PY38_LINK = f"{URL_PREFIX}/tests-python38.yml"
 WORKFLOW_TEST_PY39_LINK = f"{URL_PREFIX}/tests-python39.yml"
 WORKFLOW_TEST_PY310_LINK = f"{URL_PREFIX}/tests-python310.yml"
+WEBSITE_SNYK_LINK = ""
 
 BADGE_TEST_PY36_LINK = f"{WORKFLOW_TEST_PY36_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY37_LINK = f"{WORKFLOW_TEST_PY37_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY38_LINK = f"{WORKFLOW_TEST_PY38_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY39_LINK = f"{WORKFLOW_TEST_PY39_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY310_LINK = f"{WORKFLOW_TEST_PY310_LINK}/{BADGE_SUFFIX}"
+BADGE_SNYK_LINK = ""
 
 TITLE = (f"""# Pythonic toolbox
 
@@ -40,21 +42,22 @@ python3 tests/generate_readme_markdown.py
 
 A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.10 .
 
-
-| Test / Security | Badge |
-|-----|--------|
-|__Python3.6__| [![Python3.6 Test Status]({BADGE_TEST_PY36_LINK})]({WORKFLOW_TEST_PY36_LINK})     |
-|__Python3.7__| [![Python3.7 Test Status]({BADGE_TEST_PY37_LINK})]({WORKFLOW_TEST_PY37_LINK})     |
-|__Python3.8__| [![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})     |
-|__Python3.9__| [![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})     |
-|__Python3.10__| [![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK}) |
-
-
 ## Installation
 
 ```bash
 pip3 install pythonic-toolbox --upgrade
 ```""")
+
+BADGES = ("""
+[![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
+[![Python3.6 Test Status]({BADGE_TEST_PY36_LINK})]({WORKFLOW_TEST_PY36_LINK})
+[![Python3.7 Test Status]({BADGE_TEST_PY37_LINK})]({WORKFLOW_TEST_PY37_LINK})
+[![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})
+[![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})
+[![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK})
+[![SNYK Status](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg)]("https://snyk.io/test/github/albertmenglongli/pythonic-toolbox")
+
+""")
 
 DIR_PATH = Path(__file__).resolve().parent
 README_PATH = DIR_PATH.parent / 'README.md'
@@ -119,6 +122,18 @@ def main():
         print('README.md is generated without TOC!')
     else:
         print('README.md is generated successfully with TOC!')
+
+    # insert badges
+
+    with open(README_PATH, 'r+') as f:
+        lines = f.readlines()
+        if len(lines) >= 1:
+            lines.insert(1, BADGES)
+
+        # Reset the reader's location (in bytes)
+        f.seek(0)
+
+        f.writelines(lines)
 
 
 if __name__ == '__main__':
