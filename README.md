@@ -6,7 +6,7 @@
 [![Python3.8 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python38.yml)
 [![Python3.9 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python39.yml)
 [![Python3.10 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python310.yml)
-[![SNYK Status](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg)]("https://snyk.io/test/github/albertmenglongli/pythonic-toolbox")
+[![SNYK Status](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg)](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox)
 
 
 ## Table of Contents
