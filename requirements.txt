@@ -1,4 +1,5 @@
 pytest
+pytest-cov
 funcy>=1.16
 markdown-toc>=1.2.6
 mypy==0.960

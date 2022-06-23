@@ -48,7 +48,6 @@ A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic 
 |__Python3.8__| [![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})     |
 |__Python3.9__| [![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})     |
 |__Python3.10__| [![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK}) |
-|__OSCS__| [![OSCS Status](https://www.oscs1024.com/platform/badge/albertmenglongli/pythonic-toolbox.svg?size=small)](https://www.oscs1024.com/project/albertmenglongli/pythonic-toolbox?ref=badge_small)   |
 
 
 ## Installation
