@@ -1,3 +1,51 @@
+# begin-block-of-content[SkipContext example2]
+import time
+
+from pythonic_toolbox.utils.context_utils import SkipContext
+
+
+def plain_cronjob_increase(ns, lock):
+    start = time.time()
+    with lock:
+        now = time.time()
+        if now - start >= 0.5:
+            pass
+        else:
+            ns.cnt += 1
+            time.sleep(1)
+    return ns.cnt
+
+
+class PreemptiveLockContext(SkipContext):
+    def __init__(self, lock):
+        self.start_time = time.perf_counter()
+        self.lock = lock
+        self.acquired = self.lock.acquire(timeout=0.5)
+        skip = not self.acquired
+        super(PreemptiveLockContext, self).__init__(skip=skip)
+
+    def __exit__(self, type, value, traceback):
+        if self.acquired:
+            time.sleep(1)
+            self.lock.release()
+        if type is None:
+            return  # No exception
+        else:
+            if issubclass(type, self.SkipContentException):
+                return True  # Suppress special SkipWithBlockException
+            return False
+
+
+def cronjob_increase(ns, lock):
+    # for those who cannot acquire the lock within some time
+    # this context block will be skipped, quite simple
+    with PreemptiveLockContext(lock):
+        ns.cnt += 1
+    return ns.cnt
+
+
+# end-block-of-content[SkipContext example2]
+
 def test_SkipContext():
     import itertools
 
@@ -60,3 +108,26 @@ def test_SkipContext():
             # internal exception will be detected as normal
             raise Exception('MyError')
     assert exec_info.value.args[0] == 'MyError'
+
+    # another example: ensure there will be only one job, who acquire the lock, run the increase +1
+
+    from multiprocessing import Manager, Pool
+    # insert-block-of-content[SkipContext example2], content will be injected here when generating README.md
+
+    manager = Manager()
+    lock = manager.Lock()
+    ns = manager.Namespace()
+    pool = Pool(2)
+
+    ns.cnt = 0
+    processes = [pool.apply_async(plain_cronjob_increase, args=(ns, lock)) for __ in range(0, 2)]
+    result = [p.get() for p in processes]
+    assert result == [1, 1]
+    assert ns.cnt == 1
+
+    # reset global cnt=0
+    ns.cnt = 0
+    processes = [pool.apply_async(cronjob_increase, args=(ns, lock)) for __ in range(0, 2)]
+    result = [p.get() for p in processes]
+    assert result == [1, 1]
+    assert ns.cnt == 1

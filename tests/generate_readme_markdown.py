@@ -3,7 +3,10 @@ from inspect import getmembers, isfunction, getsource
 from operator import itemgetter
 from pathlib import Path
 import subprocess
-from typing import List
+from typing import List, Optional, Dict, DefaultDict
+import re
+
+import funcy
 
 NEW_LINE = '\n'
 SPACE = ' '
@@ -62,6 +65,10 @@ BADGES = (f"""
 DIR_PATH = Path(__file__).resolve().parent
 README_PATH = DIR_PATH.parent / 'README.md'
 
+begin_block_pattern = re.compile(r'(?<=begin-block-of-content\[)(.*?)(?=])', re.IGNORECASE)
+end_block_pattern = re.compile(r'(?<=end-block-of-content\[)(.*?)(?=])', re.IGNORECASE)
+insert_block_pattern = re.compile(r'(?<=insert-block-of-content\[)(.*?)(?=])', re.IGNORECASE)
+
 
 def get_testing_file_paths_under_current_module() -> List[Path]:
     global DIR_PATH
@@ -81,17 +88,65 @@ def remove_prefix(text, prefix):
     return text
 
 
+def extract_block_of_contents(file_path) -> DefaultDict[str, List[str]]:
+    from collections import defaultdict
+    cur_block_content_key: Optional[str] = None
+    res = defaultdict(list)
+    with open(file_path) as f:
+        all_lines = f.readlines()
+        all_lines = list(map(lambda s: s.replace('\n', ''), all_lines))
+
+    # validation for block of content' begin end pairs
+    stack = []
+    for line in all_lines:
+        begin_match = funcy.first(begin_block_pattern.findall(line))
+        end_match = funcy.first(end_block_pattern.findall(line))
+
+        if not begin_match and not end_match:
+            continue
+
+        if begin_match:
+            stack.append(begin_match)
+            continue
+
+        # for end_match case
+        if len(stack) == 1 and stack[-1] == end_match:
+            stack.pop()
+        else:
+            raise RuntimeError(f'begin-block-of-content[{end_match}]/end-block-of-content[{end_match}] not match')
+
+    for line in all_lines:
+        begin_match = funcy.first(begin_block_pattern.findall(line))
+        end_match = funcy.first(end_block_pattern.findall(line))
+
+        if end_match:
+            cur_block_content_key = None
+            continue
+
+        if cur_block_content_key is None:
+            if begin_match:
+                cur_block_content_key = begin_match
+                continue
+        else:
+            res[cur_block_content_key].append(line)
+
+    return res
+
+
 def main():
     test_file_paths: List[Path] = get_testing_file_paths_under_current_module()
     contents: List[str] = [TITLE, '## Usage']
     title_level = 3
     for testing_file_path in sorted(test_file_paths, key=lambda x: x.name):
+        block_of_contents_map: DefaultDict[str, List[str]] = extract_block_of_contents(testing_file_path)
         pkg_name = testing_file_path.stem
         pkg_name_without_test_ = remove_prefix(pkg_name, 'test_')
         contents.append(SHARP * title_level + SPACE + pkg_name_without_test_)
         pkg = __import__(pkg_name)
         name_func_pairs = get_functions_in_pkg(pkg)
         for func_name, func in sorted(name_func_pairs, key=itemgetter(0)):
+            if not func_name.startswith('test_'):
+                continue
             title_level += 1
             func_name_without_test_ = remove_prefix(func_name, 'test_')
             contents.append(SHARP * title_level + SPACE + func_name_without_test_)
@@ -103,7 +158,20 @@ def main():
             source_codes_lines.append(THREE_BACKTICKS)
             # de-indent the codes
             source_codes_lines = [remove_prefix(line, SPACE * 4) for line in source_codes_lines]
-            reformatted_source_code_str = '\n'.join(source_codes_lines)
+
+            final_source_code_lines = []
+            for line in source_codes_lines:
+                insert_match = funcy.first(insert_block_pattern.findall(line))
+                if insert_match:
+                    lines_to_insert = block_of_contents_map[insert_match]
+                    if not lines_to_insert:
+                        raise RuntimeError(f'"{insert_match}" block of content not found '
+                                           f'in current file: {testing_file_path}')
+                    final_source_code_lines.extend(lines_to_insert)
+                else:
+                    final_source_code_lines.append(line)
+
+            reformatted_source_code_str = '\n'.join(final_source_code_lines)
             contents.append(reformatted_source_code_str)
             title_level -= 1
     readme_content = (NEW_LINE * 2).join(contents)
