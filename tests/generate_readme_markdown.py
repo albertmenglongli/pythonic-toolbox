@@ -16,19 +16,21 @@ THREE_BACKTICKS = '```'
 URL_PREFIX = "https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows"
 BADGE_SUFFIX = "badge.svg?branch=master"
 
+WORKFLOW_CODEQL_LINK = f"{URL_PREFIX}/codeql-analysis.yml"
 WORKFLOW_TEST_PY36_LINK = f"{URL_PREFIX}/tests-python36.yml"
 WORKFLOW_TEST_PY37_LINK = f"{URL_PREFIX}/tests-python37.yml"
 WORKFLOW_TEST_PY38_LINK = f"{URL_PREFIX}/tests-python38.yml"
 WORKFLOW_TEST_PY39_LINK = f"{URL_PREFIX}/tests-python39.yml"
 WORKFLOW_TEST_PY310_LINK = f"{URL_PREFIX}/tests-python310.yml"
-WEBSITE_SNYK_LINK = ""
+WEBSITE_SNYK_LINK = "https://snyk.io/test/github/albertmenglongli/pythonic-toolbox"
 
+BADGE_CODEQL_LINK = f"{WORKFLOW_CODEQL_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY36_LINK = f"{WORKFLOW_TEST_PY36_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY37_LINK = f"{WORKFLOW_TEST_PY37_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY38_LINK = f"{WORKFLOW_TEST_PY38_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY39_LINK = f"{WORKFLOW_TEST_PY39_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY310_LINK = f"{WORKFLOW_TEST_PY310_LINK}/{BADGE_SUFFIX}"
-BADGE_SNYK_LINK = ""
+BADGE_SNYK_LINK = "https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg"
 
 TITLE = (f"""# Pythonic toolbox
 
@@ -53,12 +55,13 @@ pip3 install pythonic-toolbox --upgrade
 
 BADGES = (f"""
 [![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
+[![CodeQL Status]({BADGE_CODEQL_LINK})]({WORKFLOW_CODEQL_LINK})
 [![Python3.6 Test Status]({BADGE_TEST_PY36_LINK})]({WORKFLOW_TEST_PY36_LINK})
 [![Python3.7 Test Status]({BADGE_TEST_PY37_LINK})]({WORKFLOW_TEST_PY37_LINK})
 [![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})
 [![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})
 [![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK})
-[![SNYK Status](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg)](https://snyk.io/test/github/albertmenglongli/pythonic-toolbox)
+[![SNYK Status]({BADGE_SNYK_LINK})]({WEBSITE_SNYK_LINK})
 
 """)
 
