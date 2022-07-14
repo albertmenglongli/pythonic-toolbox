@@ -7,6 +7,7 @@ from typing import (List, Iterable, Generator, Union, Optional, Callable,
 from funcy import first, identity
 
 T = TypeVar("T")
+T1 = TypeVar("T1")
 
 
 def sort_with_custom_orders(values: List[T],
@@ -159,10 +160,10 @@ def _(source: List[Any], target_num: int, default: Optional[Any] = None) -> List
     return [*source, *([default] * (target_num - len(source)))] if len(source) < target_num else source[:target_num]
 
 
-def filter_allowable(candidates: Optional[List[Any]] = None,
-                     allow_list: Optional[List[T]] = None,
-                     block_list: [List[T]] = None,
-                     key: Optional[Callable[..., Any]] = None) -> Iterable[Any]:
+def filter_allowable(candidates: Optional[List[T]] = None,
+                     allow_list: Optional[List[T1]] = None,
+                     block_list: Optional[List[T1]] = None,
+                     key: Optional[Callable[..., T1]] = None) -> Iterable[T]:
     if key is None:
         key = identity
     allow_list = allow_list or set()
