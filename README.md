@@ -598,7 +598,7 @@ with pytest.raises(AttributeError):
     __ = getattr(obj_dict, 'NewAttr')
 
 # Demo for messing up key 'class'
-# deleting it and re-assigning _class
+# delete and re-assign _class
 complicated_key_dct = {
     'class': 'MyClass',  # 'class' is keyword in Python, so obj.class will cause SyntaxError
 }

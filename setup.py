@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.1.32'
+version = '1.1.33'
 
 # read the contents of your README file
 from pathlib import Path
