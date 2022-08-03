@@ -375,12 +375,13 @@ def test_DictObj():
 
     import sys
     from threading import Thread
+    from pythonic_toolbox.decorators.decorator_utils import method_synchronized
 
     class MyObjDict(DictObj):
         # implement a thread-safe method to increase the value of cnt
+        @method_synchronized
         def increase_cnt_by_n(self, n):
-            with self.__lock:
-                self.cnt += n
+            self.cnt += n
 
     def increase_cnt_by_100(dict_obj):
         for i in range(100):

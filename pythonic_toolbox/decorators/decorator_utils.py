@@ -1,5 +1,6 @@
 import asyncio
 import functools
+import threading
 
 
 def decorate_sync_async(decorating_context, func):
@@ -45,3 +46,24 @@ def decorate_auto_use_params(func):
             return lambda real_func: func(real_func, *args, **kwargs)
 
     return wrapper
+
+
+def method_synchronized(method):
+    @functools.wraps(method)
+    def inner(self, *args, **kwargs):
+        __dict__ = object.__getattribute__(self, '__dict__')
+        lock_name_str = f"_{object.__getattribute__(self, '__class__').__name__}__synchronized_lock"
+        lock = __dict__.get(lock_name_str, None)
+        if lock is None:
+            meta_lock_name_str = f"_{object.__getattribute__(self, '__class__').__name__}__synchronized_meta_lock"
+            meta_lock = __dict__.setdefault(meta_lock_name_str, threading.Lock())
+
+            with meta_lock:
+                lock = __dict__.get(lock_name_str, None)
+                if lock is None:
+                    lock = threading.RLock()
+                    object.__setattr__(self, lock_name_str, lock)
+        with lock:
+            return method(self, *args, **kwargs)
+
+    return inner

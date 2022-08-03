@@ -620,12 +620,13 @@ assert obj_dict['_class'] == 'MyClass3'
 
 import sys
 from threading import Thread
+from pythonic_toolbox.decorators.decorator_utils import method_synchronized
 
 class MyObjDict(DictObj):
     # implement a thread-safe method to increase the value of cnt
+    @method_synchronized
     def increase_cnt_by_n(self, n):
-        with self.__lock:
-            self.cnt += n
+        self.cnt += n
 
 def increase_cnt_by_100(dict_obj):
     for i in range(100):
@@ -1144,9 +1145,9 @@ assert filter_multi([is_even, is_divisible_by_5], [5, 10, 15, 20]) == [10, 20]
 from itertools import count, takewhile
 # if you want to pass an iterator, make sure the iterator will end/break,
 # Note: a bare count(start=0, step=2) will generate number like 0, 2, 4, 6, .... (never ends)
-even_numbers_less_than_50 = takewhile(lambda x: x <= 50, count(start=0, step=2))
+even_numbers_less_equal_than_50 = takewhile(lambda x: x <= 50, count(start=0, step=2))
 expected = [0, 10, 20, 30, 40, 50]
-assert filter_multi([is_even, is_divisible_by_5], even_numbers_less_than_50) == expected
+assert filter_multi([is_even, is_divisible_by_5], even_numbers_less_equal_than_50) == expected
 
 ```
 
