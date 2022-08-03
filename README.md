@@ -1,6 +1,7 @@
 # Pythonic toolbox
 
 [![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CodeQL Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/codeql-analysis.yml)
 [![Python3.6 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python36.yml)
 [![Python3.7 Test Status](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml/badge.svg?branch=master)](https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows/tests-python37.yml)
