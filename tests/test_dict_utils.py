@@ -373,6 +373,7 @@ def test_DictObj():
         assert obj_dict['class'] == 'MyClass3'
     assert obj_dict['_class'] == 'MyClass3'
 
+    # thread safe testing
     import sys
     from threading import Thread
     from pythonic_toolbox.decorators.decorator_utils import method_synchronized
