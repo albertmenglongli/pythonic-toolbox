@@ -3,9 +3,10 @@ import numbers
 from bisect import bisect_left
 from collections import UserDict, namedtuple
 from collections.abc import MutableMapping, Mapping
-from copy import deepcopy
+import copy
 from keyword import iskeyword
 from operator import attrgetter
+import threading
 from typing import (Any, Callable, Dict, Generic, Hashable, Iterator,
                     List, Optional, Tuple, TypeVar, Union, Sequence,
                     Set)
@@ -83,7 +84,7 @@ def select_list_of_dicts(dict_lst: List[Dict],
     keys = keys or []
     keys = list(keys)  # make a shallow copy
 
-    dict_lst = deepcopy(dict_lst)
+    dict_lst = copy.deepcopy(dict_lst)
     res: Union[List[Dict], Iterator[Dict]] = dict_lst
 
     if preds:
@@ -107,7 +108,7 @@ def unique_list_of_dicts(dict_list: List[Dict]) -> List[Dict]:
     for d in dict_list:
         items_tuple = tuple(d.items())
         if items_tuple not in items_tuple_set:
-            unique_res.append(deepcopy(d))
+            unique_res.append(copy.deepcopy(d))
             items_tuple_set.add(items_tuple)
     return unique_res
 
@@ -130,7 +131,7 @@ def walk_leaves(data: Optional[Union[Dict, List]] = None,
         obj = data
     else:
         # won't touch the original data
-        obj = deepcopy(data)
+        obj = copy.deepcopy(data)
 
     if trans_fun is None:
         return obj if inplace is False else None
@@ -230,7 +231,7 @@ class _MyUserDict(MutableMapping):
 class DictObj(_MyUserDict):
     def __init__(self, in_dict: Dict):
 
-        in_dict = deepcopy(in_dict)
+        in_dict = copy.deepcopy(in_dict)
 
         if any(map(lambda key: not isinstance(key, str),
                    in_dict.keys())):
@@ -238,6 +239,9 @@ class DictObj(_MyUserDict):
 
         for key, val in in_dict.items():
             in_dict[key] = self._create_obj_or_keep(val)
+
+        # set private attribute self.__lock
+        self.__dict__[f"_{object.__getattribute__(self, '__class__').__name__}__lock"] = threading.RLock()
 
         super(DictObj, self).__init__(**in_dict)
 
@@ -257,21 +261,30 @@ class DictObj(_MyUserDict):
         """
         Override popitem from MutableMapping, make behavior popitem FILO like ordinary dict since 3.6
         """
-        return self._user_dict_hidden_data.popitem()
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            return self._user_dict_hidden_data.popitem()
 
     def pop(self, key):
-        val = self._user_dict_hidden_data[key]
-        del self._user_dict_hidden_data[key]
-        return val
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            val = self._user_dict_hidden_data[key]
+            del self._user_dict_hidden_data[key]
+            return val
 
     def __getattribute__(self, item):
-        if item == '_user_dict_hidden_data':
-            return self.__dict__['_user_dict_hidden_data']
+        if item in {'_user_dict_hidden_data'}:
+            return object.__getattribute__(self, '__dict__')[item]
         else:
             return super(DictObj, self).__getattribute__(item)
 
     def __delitem__(self, key):
-        del self._user_dict_hidden_data[key]
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            del self._user_dict_hidden_data[key]
 
     def __setattr__(self, key, value):
         """DictObj that can change attribute"""
@@ -283,39 +296,47 @@ class DictObj(_MyUserDict):
                 # handle case when accessing attribute directly
                 # by adding '_' for keyword/non-identifier attribute
                 key = key[1:]
-            data[key] = self._create_obj_or_keep(value)
-            object.__setattr__(self, '_user_dict_hidden_data', data)
+            cls_name = object.__getattribute__(self, '__class__').__name__
+            lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+            with lock:
+                data[key] = self._create_obj_or_keep(value)
+                object.__setattr__(self, '_user_dict_hidden_data', data)
 
     def __getattr__(self, item):
-        try:
-            res = self.__dict__['_user_dict_hidden_data'][item]
-        except KeyError:
-            if len(item) >= 2 and item.startswith('_') and not item.startswith('__'):
-                # keyword like attribute can be accessed by adding "_" in prefix
-                new_item = item[1:]
-                if new_item.isidentifier() is False or iskeyword(new_item):
-                    try:
-                        return self.__dict__['_user_dict_hidden_data'][new_item]
-                    except KeyError:
-                        pass
-            raise AttributeError(f'AttributeError {item}')
-        else:
-            return res
+        __dict__ = object.__getattribute__(self, '__dict__')
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            try:
+                return __dict__['_user_dict_hidden_data'][item]
+            except KeyError:
+                if len(item) >= 2 and item.startswith('_') and not item.startswith('__'):
+                    # keyword like attribute can be accessed by adding "_" in prefix
+                    new_item = item[1:]
+                    if new_item.isidentifier() is False or iskeyword(new_item):
+                        try:
+                            return __dict__['_user_dict_hidden_data'][new_item]
+                        except KeyError:
+                            pass
+                raise AttributeError(f'AttributeError {item}')
 
     def __delattr__(self, item):
-        try:
-            del self[item]
-        except KeyError:
-            if len(item) >= 2 and item.startswith('_') and not item.startswith('__'):
-                # keyword-like / non-identifier-like attribute can be accessed by adding "_" in prefix
-                new_item = item[1:]
-                if not new_item.isidentifier() or iskeyword(new_item):
-                    try:
-                        del self[new_item]
-                        return
-                    except KeyError:
-                        pass
-            raise AttributeError
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            try:
+                del self[item]
+            except KeyError:
+                if len(item) >= 2 and item.startswith('_') and not item.startswith('__'):
+                    # keyword-like / non-identifier-like attribute can be accessed by adding "_" in prefix
+                    new_item = item[1:]
+                    if not new_item.isidentifier() or iskeyword(new_item):
+                        try:
+                            del self[new_item]
+                            return
+                        except KeyError:
+                            pass
+                raise AttributeError
 
     def __eq__(self, other: 'DictObj') -> bool:
         if isinstance(other, DictObj):
@@ -326,17 +347,33 @@ class DictObj(_MyUserDict):
         """not hashable"""
         return None
 
-    def to_dict(self):
+    def __copy__(self):
+        my_copy = type(self)({})
+        my_copy._user_dict_hidden_data = copy.copy(self._user_dict_hidden_data)
+        return my_copy
+
+    def __deepcopy__(self, memo=None):
+        if memo is None:
+            memo = {}
+        my_copy = type(self)({})
+        with self.__lock:
+            my_copy._user_dict_hidden_data = copy.deepcopy(self._user_dict_hidden_data, memo)
+        return my_copy
+
+    def to_dict(self, flatten=True):
         result = {}
-        for key, item in self._user_dict_hidden_data.items():
-            if isinstance(item, (list, tuple)):
-                result[key] = [x.to_dict() if hasattr(x, 'to_dict') and callable(getattr(x, 'to_dict')) else x
-                               for x in item]
-            elif isinstance(item, DictObj):
-                result[key] = item.to_dict()
-            else:
-                result[key] = item
-        return result
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            for key, item in self._user_dict_hidden_data.items():
+                if isinstance(item, (list, tuple)):
+                    result[key] = [x.to_dict() if hasattr(x, 'to_dict') and callable(getattr(x, 'to_dict')) else x
+                                   for x in item]
+                elif isinstance(item, DictObj) and flatten:
+                    result[key] = item.to_dict()
+                else:
+                    result[key] = item
+            return result
 
 
 def _frozen_checker(func):
@@ -354,9 +391,7 @@ class FinalDictObj(DictObj):
     __frozen_err_msg = 'Cannot modify attribute/item in an already initialized FinalDictObj'
 
     def __init__(self, in_dict: Dict):
-
-        in_dict = deepcopy(in_dict)
-
+        in_dict = copy.deepcopy(in_dict)
         super(FinalDictObj, self).__init__(in_dict)
         self._freeze()
 
@@ -392,11 +427,7 @@ class FinalDictObj(DictObj):
     def __setattr__(self, key, value):
         """DictObj that cannot change attribute"""
         if key == '_FinalDictObj__is_frozen':
-            if value is True:
-                # __is_frozen can only be assigned as True
-                object.__setattr__(self, '_FinalDictObj__is_frozen', True)
-            else:
-                raise RuntimeError('__is_frozen can only be assigned as True')
+            object.__setattr__(self, '_FinalDictObj__is_frozen', value)
         else:
             if self.__is_frozen:
                 raise RuntimeError(self.__frozen_err_msg)
@@ -410,6 +441,25 @@ class FinalDictObj(DictObj):
     @_frozen_checker
     def update(self, *args, **kwargs):
         super(FinalDictObj, self).update(*args, **kwargs)
+
+    def __copy__(self):
+        my_copy = type(self)({})
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            my_copy._FinalDictObj__is_frozen = False
+            my_copy._user_dict_hidden_data = copy.copy(self._user_dict_hidden_data)
+            my_copy._FinalDictObj__is_frozen = True
+        return my_copy
+
+    def __deepcopy__(self, memo=None):
+        cls_name = object.__getattribute__(self, '__class__').__name__
+        lock = object.__getattribute__(self, '__dict__')[f"_{cls_name}__lock"]
+        with lock:
+            if memo is None:
+                memo = {}
+            my_copy = type(self)(copy.deepcopy(self.to_dict(), memo))
+        return my_copy
 
 
 class RangeKeyDict(Generic[KT, VT]):
@@ -631,3 +681,7 @@ class StrKeyIdDict(UserDict):
         for key in iterable:
             d[key] = value
         return d
+
+
+if __name__ == '__main__':
+    pass

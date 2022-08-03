@@ -618,6 +618,42 @@ with pytest.raises(KeyError):
     assert obj_dict['class'] == 'MyClass3'
 assert obj_dict['_class'] == 'MyClass3'
 
+import sys
+from threading import Thread
+
+class MyObjDict(DictObj):
+    # implement a thread-safe method to increase the value of cnt
+    def increase_cnt_by_n(self, n):
+        with self.__lock:
+            self.cnt += n
+
+def increase_cnt_by_100(dict_obj):
+    for i in range(100):
+        dict_obj.increase_cnt_by_n(1)
+
+sw_interval = sys.getswitchinterval()
+try:
+    sys.setswitchinterval(0.0001)
+    my_dict_obj = MyObjDict({'cnt': 0})
+    threads = [Thread(target=increase_cnt_by_100, args=(my_dict_obj,)) for _ in range(100)]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    assert my_dict_obj.cnt == 10000
+finally:
+    sys.setswitchinterval(sw_interval)
+
+# test copy/deepcopy of DictObj
+import copy
+
+person = DictObj({'name': 'albert', 'age': 33})
+team = DictObj({'leader': person})
+shallow_copy_of_team = copy.copy(team)
+assert team.leader is shallow_copy_of_team.leader
+
+deep_copy_of_team = copy.deepcopy(team)
+assert team.leader is not deep_copy_of_team.leader
+assert team.leader == deep_copy_of_team.leader
+
 ```
 
 #### FinalDictObj
@@ -676,6 +712,18 @@ final_obj_dict = FinalDictObj({
 assert final_obj_dict['class'] == 'MyClass'
 assert getattr(final_obj_dict, 'class') == 'MyClass'
 assert final_obj_dict._class == 'MyClass'
+
+# test copy/deepcopy of FileDictObj
+import copy
+person = FinalDictObj({'name': 'albert', 'age': 33})
+team = FinalDictObj({'leader': person})
+shallow_copy_of_team = copy.copy(team)
+assert team.leader is shallow_copy_of_team.leader
+assert team.leader == shallow_copy_of_team.leader
+
+deep_copy_of_team = copy.deepcopy(team)
+assert team.leader is not deep_copy_of_team.leader
+assert team.leader == deep_copy_of_team.leader
 
 ```
 
