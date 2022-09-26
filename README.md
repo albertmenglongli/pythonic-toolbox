@@ -365,8 +365,35 @@ async def async_main():
     assert async_func_fail_first_time2.__doc__ == 'async_func_fail_first_time2'
 
 loop = asyncio.get_event_loop()
+if loop.is_closed():
+    loop = asyncio.new_event_loop()
 try:
     loop.run_until_complete(async_main())
+finally:
+    loop.close()
+
+import random
+fail_count = 0
+
+@retry(delay=0.1)
+async def always_fail_func():
+    nonlocal fail_count
+    fail_count += 1
+    await asyncio.sleep(random.random())
+    raise ValueError()
+
+async def async_main_for_always_fail():
+    nonlocal fail_count
+    tasks = [always_fail_func() for i in range(0, 3)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    assert all(map(lambda e: isinstance(e, ValueError), results))
+    assert fail_count == 2 * 3  # each func run twice, three func calls
+
+loop = asyncio.get_event_loop()
+if loop.is_closed():
+    loop = asyncio.new_event_loop()
+try:
+    loop.run_until_complete(async_main_for_always_fail())
 finally:
     loop.close()
 

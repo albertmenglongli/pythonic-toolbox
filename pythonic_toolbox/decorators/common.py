@@ -59,12 +59,10 @@ def duration(func: Callable[..., T], time_threshold: float = 1) -> Callable[...,
 @decorate_auto_use_params
 def retry(func: Callable[..., T], tries: int = 1,
           delay: Union[int, float] = 1, factor: Union[int, float] = 2) -> Callable[..., T]:
-    _tries, _delay = tries, delay
-    _tries += 1  # ensure we call func at least once
-
     if asyncio.iscoroutinefunction(func):
         async def decorated(*args, **kwargs):
-            nonlocal _tries, _delay
+            _tries, _delay = tries, delay
+            _tries += 1  # ensure we call func at least once
             while _tries > 0:
                 try:
                     return await func(*args, **kwargs)
@@ -74,10 +72,10 @@ def retry(func: Callable[..., T], tries: int = 1,
                         raise e
                     time.sleep(_delay)
                     _delay *= factor
-
     else:
         def decorated(*args, **kwargs):
-            nonlocal _tries, _delay
+            _tries, _delay = tries, delay
+            _tries += 1  # ensure we call func at least once
             while _tries > 0:
                 try:
                     return func(*args, **kwargs)
