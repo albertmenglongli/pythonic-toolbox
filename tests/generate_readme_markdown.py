@@ -22,6 +22,7 @@ WORKFLOW_TEST_PY37_LINK = f"{URL_PREFIX}/tests-python37.yml"
 WORKFLOW_TEST_PY38_LINK = f"{URL_PREFIX}/tests-python38.yml"
 WORKFLOW_TEST_PY39_LINK = f"{URL_PREFIX}/tests-python39.yml"
 WORKFLOW_TEST_PY310_LINK = f"{URL_PREFIX}/tests-python310.yml"
+WORKFLOW_TEST_PY311_LINK = f"{URL_PREFIX}/tests-python311.yml"
 WEBSITE_SNYK_LINK = "https://snyk.io/test/github/albertmenglongli/pythonic-toolbox"
 
 BADGE_CODEQL_LINK = f"{WORKFLOW_CODEQL_LINK}/{BADGE_SUFFIX}"
@@ -30,6 +31,7 @@ BADGE_TEST_PY37_LINK = f"{WORKFLOW_TEST_PY37_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY38_LINK = f"{WORKFLOW_TEST_PY38_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY39_LINK = f"{WORKFLOW_TEST_PY39_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_PY310_LINK = f"{WORKFLOW_TEST_PY310_LINK}/{BADGE_SUFFIX}"
+BADGE_TEST_PY311_LINK = f"{WORKFLOW_TEST_PY311_LINK}/{BADGE_SUFFIX}"
 BADGE_SNYK_LINK = "https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg"
 
 TITLE = (f"""# Pythonic toolbox
@@ -45,7 +47,7 @@ python3 tests/generate_readme_markdown.py
 
 ## Introduction
 
-A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.10 .
+A python3.6+ toolbox with multi useful utils, functions, decorators in pythonic way, and is fully tested from python3.6 to python3.11 .
 
 ## Installation
 
@@ -64,6 +66,7 @@ BADGES = (f"""
 [![Python3.8 Test Status]({BADGE_TEST_PY38_LINK})]({WORKFLOW_TEST_PY38_LINK})
 [![Python3.9 Test Status]({BADGE_TEST_PY39_LINK})]({WORKFLOW_TEST_PY39_LINK})
 [![Python3.10 Test Status]({BADGE_TEST_PY310_LINK})]({WORKFLOW_TEST_PY310_LINK})
+[![Python3.11 Test Status]({BADGE_TEST_PY311_LINK})]({WORKFLOW_TEST_PY311_LINK})
 [![SNYK Status]({BADGE_SNYK_LINK})]({WEBSITE_SNYK_LINK})
 
 """)
