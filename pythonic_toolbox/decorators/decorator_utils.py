@@ -24,7 +24,7 @@ def decorate_auto_use_params(func):
     def my_decorator(func, key1=val1, key2=val2, ...) -> Callable[..., T]:
         ...
 
-    the decorator with default params can used like this:
+    the decorator with default params can be used like this:
 
     @my_decorator
     def foo():

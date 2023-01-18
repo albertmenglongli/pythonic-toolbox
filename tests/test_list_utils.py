@@ -15,6 +15,9 @@ def test_until():
 
 
 def test_sort_with_custom_orders():
+    from operator import itemgetter
+    from typing import List
+
     import pytest
     from pythonic_toolbox.utils.list_utils import sort_with_custom_orders
 
@@ -36,18 +39,35 @@ def test_sort_with_custom_orders():
     assert sort_with_custom_orders([], prefix_orders=[], suffix_orders=[]) == []
     assert sort_with_custom_orders([], prefix_orders=['master']) == []
 
-    # testing for unhashable values
+    # tests for unhashable values
     values = [[2, 2], [1, 1], [3, 3], [6, 0]]
-    expected = [[3, 3], [1, 1], [2, 2], [6, 0]]
-    assert sort_with_custom_orders(values, prefix_orders=[[3, 3]], key=lambda x: sum(x)) == expected
+    assert sort_with_custom_orders(values, prefix_orders=[[3, 3]]) == [[3, 3], [1, 1], [2, 2], [6, 0]]
+    # if "key" is provided, items are sorted in order of key(item)
+    # items in prefix_orders/suffix_orders don't need to be one-one correspondence with items to sort
+    # sum([6]) == sum([3, 3]) == sum([6, 0])
+    assert sort_with_custom_orders(values, prefix_orders=[[6]], key=sum) == [[3, 3], [6, 0], [1, 1], [2, 2]]
 
+    # tests for list of dicts
     values = [{2: 2}, {1: 1}, {1: 2}]
-    expected = [{2: 2}, {1: 1}, {1: 2}]
     assert sort_with_custom_orders(values, prefix_orders=[{2: 2}],
-                                   key=lambda data: sum(data.values())) == expected
-    assert sort_with_custom_orders(values, prefix_orders=[{2: 2}],
-                                   key=lambda data: sum(data.values()), hash_fun=tuple) == expected
+                                   key=lambda data: sum(data.values())) == [{2: 2}, {1: 2}, {1: 1}]
 
+    branch_info: List[dict] = [{'branch': 'master', 'commit_id': 'v1.2'}, {'branch': 'release', 'commit_id': 'v1.1'}]
+    # Assume that we prefer choosing branch in order: release > master > others (develop, hotfix etc.)
+    res = sort_with_custom_orders(branch_info,
+                                  prefix_orders=[{'branch': 'release'}, {'branch': 'master'}],
+                                  key=itemgetter('branch'))
+    expected = [{'branch': 'release', 'commit_id': 'v1.1'}, {'branch': 'master', 'commit_id': 'v1.2'}]
+    assert res == expected
+
+    branch_info = [{'branch': 'develop', 'commit_id': 'v1.3'}, {'branch': 'master', 'commit_id': 'v1.2'}]
+    res = sort_with_custom_orders(branch_info,
+                                  prefix_orders=[{'branch': 'release'}, {'branch': 'master'}],
+                                  key=itemgetter('branch'))
+    expected = [{'branch': 'master', 'commit_id': 'v1.2'}, {'branch': 'develop', 'commit_id': 'v1.3'}]
+    assert res == expected
+
+    # tests for exceptions
     with pytest.raises(ValueError) as exec_info:
         sort_with_custom_orders([1, 2, 3], prefix_orders=[3], suffix_orders=[3])
     assert exec_info.value.args[0] == 'prefix and suffix contains same value'
@@ -56,6 +76,7 @@ def test_sort_with_custom_orders():
         sort_with_custom_orders([1, 2, 3], prefix_orders=[1, 1])
     assert exec_info.value.args[0] == 'prefix_orders contains duplicated values'
 
+    # tests for class
     class Person:
         def __init__(self, id, name, age):
             self.id = id

@@ -84,13 +84,13 @@ def sort_with_custom_orders(values: List[T],
 
     order_map: DefaultDict[Hashable, int] = defaultdict(lambda: 1)
     for idx, item in enumerate(prefix_orders):
-        order_map[_hash_fun(item)] = idx - len(prefix_orders)
+        order_map[_hash_fun(key(item))] = idx - len(prefix_orders)
 
     for idx, item in enumerate(suffix_orders, start=2):
-        order_map[_hash_fun(item)] = idx
+        order_map[_hash_fun(key(item))] = idx
 
     def key_func(x: T) -> Tuple[int, Any]:
-        return order_map[hash_fun(x)], key(x)
+        return order_map[hash_fun(key(x))], key(x)
 
     sorted_values = sorted(values, key=key_func, reverse=reverse)
 

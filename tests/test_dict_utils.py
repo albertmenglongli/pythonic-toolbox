@@ -660,7 +660,10 @@ def test_StrKeyIdDict():
     assert my_dict == {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
     assert dict(my_dict) == {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
 
-    my_dict = StrKeyIdDict({'data': 'oops', '1': 'a'})
-    # test case when key is data, which is a reserved keyword inside StrKeyIdDict
-    assert my_dict['data'] == 'oops'
+    # test case when "key" is "data", which is a reserved keyword inside StrKeyIdDict
+    my_dict = StrKeyIdDict({'data': 'data_value', '1': 'a'})
+    assert my_dict['data'] == 'data_value'
+    assert my_dict['1'] == 'a'
+    # delete key 'data', should not affect other keys
+    del my_dict['data']
     assert my_dict['1'] == 'a'
