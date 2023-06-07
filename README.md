@@ -830,6 +830,26 @@ expected_error_msg = ("Overlap detected: "
                       "(0, 10): 'val-between-0-and-10', (5, 15): 'val-between-5-and-15'")
 assert exec_info.value.args[0] == expected_error_msg
 
+# test RangeKeyDict with no continuous ranges
+range_key_dict: RangeKeyDict[float, str] = RangeKeyDict({
+    (0, 60): 'F',  # 0 <= val < 60
+    (70, 80): 'C',  # 70 <= val < 80
+})
+
+assert range_key_dict[10] == 'F'
+
+with pytest.raises(KeyError) as exec_info:
+    _ = range_key_dict[-100]
+assert exec_info.value.args[0] == 'KeyError: -100'
+
+with pytest.raises(KeyError) as exec_info:
+    _ = range_key_dict[65]
+assert exec_info.value.args[0] == 'KeyError: 65'
+
+with pytest.raises(KeyError) as exec_info:
+    _ = range_key_dict[100]
+assert exec_info.value.args[0] == 'KeyError: 100'
+
 from functools import total_ordering
 
 @total_ordering
