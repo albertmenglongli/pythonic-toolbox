@@ -9,9 +9,27 @@ def test_until():
 
     assert until([1, 2, 3], lambda x: x > 10, default=11) == 11
 
+    # test case for when there's no default value and no item in the iterable satisfies the condition
+    assert until([1, 2, 3], lambda x: x > 10) is None
+
     # edge cases
     assert until([], default=3) == 3  # nothing provided, return default
     assert until(None, lambda x: x > 10, default=11) == 11
+
+    # test case for when there's no item in the counter satisfies the condition
+    # the following codes will run forever, so comment them out
+    # counter = count(1, 2)  # generator of odd numbers: 1, 3, 5, 7 ...
+    # assert until(counter, lambda x: x % 2 == 0) is None
+
+    # test case for when max_iter_num is provided, only iterate the counter for max_iter_num times
+    counter = count(1, 2)  # generator of odd numbers: 1, 3, 5, 7 ...
+    assert until(counter, lambda x: x % 2 == 0, default=None, max_iter_num=100) is None
+
+    numbers = [1, 2, 3, 4, 5, 6]
+    assert until(numbers, lambda x: x >= 5, default=None, max_iter_num=1) is None
+    assert until(numbers, lambda x: x >= 5, default=None, max_iter_num=4) is None
+    assert until(numbers, lambda x: x >= 5, default=None, max_iter_num=5) == 5
+    assert until(numbers, lambda x: x >= 5, default=None, max_iter_num=100) == 5
 
 
 def test_sort_with_custom_orders():

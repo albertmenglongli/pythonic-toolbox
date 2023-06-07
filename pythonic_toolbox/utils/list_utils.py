@@ -99,11 +99,22 @@ def sort_with_custom_orders(values: List[T],
 
 def until(values: Optional[Union[List[T], Iterable]],
           terminate: Optional[Callable[[T], bool]] = None,
-          default: Optional[T] = None) -> Optional[T]:
+          default: Optional[T] = None,
+          max_iter_num: Optional[int] = None,
+          ) -> Optional[T]:
     class Empty:
         pass
 
     UNSIGNED = Empty()
+
+    if isinstance(max_iter_num, int):
+        if max_iter_num <= 0:
+            raise ValueError('max_iter_num should be positive integer')
+    elif max_iter_num is None:
+        # will not check max_iter_num
+        pass
+    else:
+        raise ValueError('max_iter_num should be positive integer or None')
 
     def default_terminate(v: Any) -> bool:
         return v is not UNSIGNED
@@ -115,7 +126,9 @@ def until(values: Optional[Union[List[T], Iterable]],
         terminate = default_terminate
 
     if isinstance(values, (list, Iterable)):
-        for value in values:
+        for idx, value in enumerate(values, start=1):
+            if max_iter_num is not None and idx > max_iter_num:
+                break
             if terminate(value):
                 return value
         else:
