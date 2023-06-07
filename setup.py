@@ -1,10 +1,28 @@
-from setuptools import setup, find_packages
-
-version = '1.1.36'
-
-# read the contents of your README file
+import re
+import sys
 from pathlib import Path
 
+from setuptools import setup, find_packages
+
+# handle version info from version.py in project
+__version__ = None
+filepath = 'pythonic_toolbox/version.py'
+with open(filepath, 'r') as version_file:
+    try:
+        content = version_file.read()
+        version_match = re.search(r"^__version__\s*=\s*['\"]([^'\"]*)['\"]", content, re.M)
+
+    except Exception as error:
+        print(f'Failed to find version info`: {error}')
+        sys.exit(1)
+    else:
+        if version_match:
+            __version__ = version_match.group(1)
+
+if not __version__:
+    raise RuntimeError('version is not set successfully')
+
+# read the contents of your README file
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 url = 'https://github.com/albertmenglongli/pythonic-toolbox'
@@ -15,7 +33,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=version,
+    version=__version__,
 
     description='a toolbox with pythonic utils, tools',
     long_description=long_description,
