@@ -76,7 +76,7 @@ def select_list_of_dicts(dict_lst: List[Dict],
                          look_like: Optional[Dict] = None,
                          preds: Optional[List[Callable[[Dict], bool]]] = None,
                          keys: Optional[List[HashableT]] = None,
-                         unique=False, val_for_missing_key=None) -> List[Dict]:
+                         val_for_missing_key=None, unique=False) -> List[Dict]:
     """ Select part of the dict collections."""
 
     from funcy import rpartial, project, all_fn
