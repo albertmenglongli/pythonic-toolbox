@@ -73,6 +73,7 @@ def collect_leaves(data: Optional[Union[Dict, List]] = None,
 
 
 def select_list_of_dicts(dict_lst: List[Dict],
+                         look_like: Optional[Dict] = None,
                          preds: Optional[List[Callable[[Dict], bool]]] = None,
                          keys: Optional[List[HashableT]] = None,
                          unique=False, val_for_missing_key=None) -> List[Dict]:
@@ -88,8 +89,12 @@ def select_list_of_dicts(dict_lst: List[Dict],
     dict_lst = copy.deepcopy(dict_lst)
     res: Union[List[Dict], Iterator[Dict]] = dict_lst
 
+    if look_like:
+        look_like = copy.deepcopy(look_like)
+        res = filter(lambda dct: all(dct.get(k) == v for k, v in look_like.items()), res)
+
     if preds:
-        res = filter(all_fn(*preds), dict_lst)
+        res = filter(all_fn(*preds), res)
 
     if keys:
         # select target keys

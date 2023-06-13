@@ -1062,25 +1062,30 @@ dict_lst = [
     {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
     # another Peter Parker from multiverse
     {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+    # age unknown for Carol Danvers, no age field
     {'name': 'Carol Danvers', 'sex': 'female', 'alias': 'Captain Marvel'},
     {'name': 'Natasha Romanoff', 'sex': 'female', 'age': 35, 'alias': 'Black Widow'},
 ]
 
-assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'female']) == [
+assert select_list_of_dicts(dict_lst, look_like={'name': 'Peter Parker'}) == [
+    {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+    {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'}]
+
+assert select_list_of_dicts(dict_lst, look_like={'sex': 'female'}) == [
     {'name': 'Carol Danvers', 'sex': 'female', 'alias': 'Captain Marvel'},
     {'name': 'Natasha Romanoff', 'sex': 'female', 'age': 35, 'alias': 'Black Widow'}]
 
-assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'female'], keys=['name']) == [
+assert select_list_of_dicts(dict_lst, look_like={'sex': 'female'}, keys=['name']) == [
     {'name': 'Carol Danvers'}, {'name': 'Natasha Romanoff'}]
 
 # unique is supported for return list
-assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'male'], keys=['name', 'age']) == [
+assert select_list_of_dicts(dict_lst, look_like={'sex': 'male'}, keys=['name', 'age']) == [
     {'name': 'Tony Stark', 'age': 49},
     {'name': 'Peter Parker', 'age': 16},
     {'name': 'Peter Parker', 'age': 16},
 ]
 
-assert select_list_of_dicts(dict_lst, [lambda d: d['sex'] == 'male'], keys=['name', 'age'], unique=True) == [
+assert select_list_of_dicts(dict_lst, look_like={'sex': 'male'}, keys=['name', 'age'], unique=True) == [
     {'name': 'Tony Stark', 'age': 49},
     {'name': 'Peter Parker', 'age': 16}]
 
@@ -1090,7 +1095,7 @@ assert list(select_list_of_dicts(dict_lst, keys=['age', 'name'], unique=True)[0]
 
 # locate Captain Marvel, with default val for missing key
 assert select_list_of_dicts(dict_lst,
-                            preds=[lambda d: d['alias'] == 'Captain Marvel'],
+                            look_like={'alias': 'Captain Marvel'},
                             keys=['name', 'sex', 'age', 'alias'],
                             val_for_missing_key='Unknown')[0]['age'] == 'Unknown'
 
@@ -1099,15 +1104,24 @@ assert select_list_of_dicts([]) == []
 assert select_list_of_dicts(dict_lst) == dict_lst
 
 # new list of dicts is returned, leaving the original list of dicts untouched
-black_widow = select_list_of_dicts(dict_lst, [lambda d: d['name'] == 'Natasha Romanoff'])[0]
+black_widow = select_list_of_dicts(dict_lst, look_like={'name': 'Natasha Romanoff'})[0]
 black_widow['age'] += 1
 assert black_widow['age'] == 36
 # we don't modify the original dict data, Natasha is always 35 years old
-assert select_list_of_dicts(dict_lst, [lambda d: d['name'] == 'Natasha Romanoff'])[0]['age'] == 35
+assert select_list_of_dicts(dict_lst, look_like={'name': 'Natasha Romanoff'})[0]['age'] == 35
 
-# filter the ones with age info
-assert len(select_list_of_dicts(dict_lst, [lambda d: 'age' in d])) == 4
-assert len(select_list_of_dicts(dict_lst, [lambda d: 'age' in d], unique=True)) == 3
+# preds provide more flexibility, filter the ones with age info
+assert len(select_list_of_dicts(dict_lst, preds=[lambda d: 'age' in d, lambda d: d['age'] >= 0])) == 4
+assert len(select_list_of_dicts(dict_lst, preds=[lambda d: 'age' in d, lambda d: d['age'] >= 0], unique=True)) == 3
+
+# combine look_like and preds parameters
+expected = [{'name': 'Tony Stark', 'sex': 'male', 'age': 49, 'alias': 'Iron Man'}]
+assert select_list_of_dicts(dict_lst, look_like={'sex': 'male'},
+                            preds=[lambda d: 'age' in d, lambda d: d['age'] > 20]) == expected
+
+# empty list is returned if no dict matches the criteria
+assert select_list_of_dicts(dict_lst, look_like={'sex': 'male'},
+                            preds=[lambda d: 'sex' in d and d['sex'] == 'female']) == []
 
 ```
 
