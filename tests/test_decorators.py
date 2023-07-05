@@ -120,6 +120,48 @@ def test_retry():
     assert func_fail_three_times.call_times == 3
     assert exec_info.value.args[0] == 'Fail when called first, second, third time'
 
+    def raw_func_fail_first_time():
+        """func_fail_first_time"""
+        self = raw_func_fail_first_time
+        if not hasattr(self, 'call_times'):
+            # set attribute call_times for function, to count call times
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times == 1:
+            raise Exception('Fail when first called')
+        return 'ok'
+
+    assert retry(raw_func_fail_first_time)() == 'ok'
+
+    # test cases when function has arguments, kwargs
+    @retry(tries=1, delay=0.1)
+    def func_fail_first_time_with_parameters(p1, p2):
+        """func_fail_first_time"""
+        self = func_fail_first_time_with_parameters
+        if not hasattr(self, 'call_times'):
+            # set attribute call_times for function, to count call times
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times == 1:
+            raise Exception('Fail when first called')
+        return p1 + p2
+
+    assert func_fail_first_time_with_parameters(1, 2) == 3
+
+    def func_fail_first_time_with_parameters(p1, p2):
+        """func_fail_first_time"""
+        self = func_fail_first_time_with_parameters
+        if not hasattr(self, 'call_times'):
+            # set attribute call_times for function, to count call times
+            self.call_times = 0
+        self.call_times += 1
+        if self.call_times == 1:
+            raise Exception('Fail when first called')
+        return p1 + p2
+
+    assert retry(tries=1, delay=0.1)(func_fail_first_time_with_parameters)(1, 2) == 3
+    assert retry(tries=1, delay=0.1)(func_fail_first_time_with_parameters)(p1=1, p2=2) == 3
+
     import asyncio
 
     @retry
