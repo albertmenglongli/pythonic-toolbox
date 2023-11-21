@@ -131,13 +131,26 @@ def main():
     test_file_paths: List[Path] = get_testing_file_paths_under_current_module()
     contents: List[str] = [TITLE, '## Usage']
     title_level = 3
-    for testing_file_path in sorted(test_file_paths, key=lambda x: x.name):
-        block_of_contents_map: DefaultDict[str, List[str]] = extract_block_of_contents(testing_file_path)
+
+    from pythonic_toolbox.utils.list_utils import sort_with_custom_orders
+
+    if test_file_paths:
+        test_file_path_dir = funcy.first(test_file_paths).parent
+        suffix_orders = [
+            test_file_path_dir / 'test_context',
+        ]
+        test_file_paths = sort_with_custom_orders(test_file_paths,
+                                                  # put these test demos in the end, due to a little complicated
+                                                  suffix_orders=suffix_orders,
+                                                  key=lambda x: x.stem)
+
+    for testing_file_path in test_file_paths:
         pkg_name = testing_file_path.stem
         pkg_name_without_test_ = remove_prefix(pkg_name, 'test_')
         contents.append(SHARP * title_level + SPACE + pkg_name_without_test_)
         pkg = __import__(pkg_name)
         name_func_pairs = get_functions_in_pkg(pkg)
+        block_of_contents_map: DefaultDict[str, List[str]] = extract_block_of_contents(testing_file_path)
         for func_name, func in sorted(name_func_pairs, key=itemgetter(0)):
             if not func_name.startswith('test_'):
                 continue
