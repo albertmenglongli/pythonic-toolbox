@@ -112,7 +112,7 @@ def unique_list_of_dicts(dict_list: List[Dict]) -> List[Dict]:
     unique_res: List[Dict] = list()
     items_tuple_set = set()
     for d in dict_list:
-        items_tuple = tuple(d.items())
+        items_tuple = tuple(sorted(d.items(), key=lambda k: k[0]))
         if items_tuple not in items_tuple_set:
             unique_res.append(copy.deepcopy(d))
             items_tuple_set.add(items_tuple)

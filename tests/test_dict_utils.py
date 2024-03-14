@@ -153,6 +153,8 @@ def test_unique_list_of_dicts():
         # Peter Parkers from multiverse in same age.
         {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
         {'name': 'Peter Parker', 'sex': 'male', 'age': 16, 'alias': 'Spider Man'},
+        # test same dict, but the order of dict is different
+        {'name': 'Peter Parker', 'sex': 'male', 'alias': 'Spider Man', 'age': 16},
     ]
 
     # Only one Peter Parker will be kept, for all data are exactly same.
