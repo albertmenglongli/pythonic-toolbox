@@ -4,3 +4,4 @@ funcy>=1.16
 markdown-toc>=1.2.6
 mypy==0.960
 mypy-extensions==0.4.3
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
