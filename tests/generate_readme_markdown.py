@@ -148,10 +148,12 @@ BADGE_SUFFIX = "badge.svg?branch=master"
 WORKFLOW_CODEQL_LINK = f"{URL_PREFIX}/codeql-analysis.yml"
 WORKFLOW_TEST_LINK = f"{URL_PREFIX}/tests-python-versions.yml"
 WEBSITE_SNYK_LINK = "https://snyk.io/test/github/albertmenglongli/pythonic-toolbox"
+DOWNLOAD_STREAM_LINK = "https://pypistats.org/packages/pythonic-toolbox"
 
 BADGE_CODEQL_LINK = f"{WORKFLOW_CODEQL_LINK}/{BADGE_SUFFIX}"
 BADGE_TEST_LINK = f"{WORKFLOW_TEST_LINK}/{BADGE_SUFFIX}"
 BADGE_SNYK_LINK = "https://snyk.io/test/github/albertmenglongli/pythonic-toolbox/badge.svg"
+BADGE_DOWNLOAD_STREAM_LINK = "https://img.shields.io/badge/dynamic/json?url=https://pypistats.org/api/packages/pythonic-toolbox/recent%3Fperiod%3Dmonth&query=$.data.last_month&label=downloads&suffix=%2Fmonth&cacheSeconds=86400"
 
 TITLE = (f"""# Pythonic toolbox
 
@@ -176,13 +178,13 @@ pip3 install pythonic-toolbox --upgrade
 
 BADGES = (f"""
 [![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
+[![PyPI downloads/mont]({BADGE_DOWNLOAD_STREAM_LINK})]({DOWNLOAD_STREAM_LINK})
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/pythonic-toolbox.svg?style=flat&logo=python&logoColor=yellow&labelColor=5c5c5c)](https://pypi.org/project/pythonic-toolbox)
 [![Stability](https://img.shields.io/pypi/status/pythonic-toolbox.svg?style=flat)](https://badge.fury.io/py/pythonic-toolbox)
 [![CodeQL Status]({BADGE_CODEQL_LINK})]({WORKFLOW_CODEQL_LINK})
 [![Python3.6 Test Status]({BADGE_TEST_LINK})]({WORKFLOW_TEST_LINK})
 [![SNYK Status]({BADGE_SNYK_LINK})]({WEBSITE_SNYK_LINK})
-
 """)
 
 DIR_PATH = Path(__file__).resolve().parent
