@@ -1,6 +1,7 @@
 # Pythonic toolbox
 
 [![PyPI version](https://badge.fury.io/py/pythonic-toolbox.svg)](https://badge.fury.io/py/pythonic-toolbox)
+[![total downloads](https://img.shields.io/pepy/dt/pythonic-toolbox?logo=pypi&label=downloads)](https://pepy.tech/projects/pythonic-toolbox)
 [![PyPI downloads/mont](https://img.shields.io/badge/dynamic/json?url=https://pypistats.org/api/packages/pythonic-toolbox/recent%3Fperiod%3Dmonth&query=$.data.last_month&label=downloads&suffix=%2Fmonth&cacheSeconds=86400)](https://pypistats.org/packages/pythonic-toolbox)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/pythonic-toolbox.svg?style=flat&logo=python&logoColor=yellow&labelColor=5c5c5c)](https://pypi.org/project/pythonic-toolbox)
