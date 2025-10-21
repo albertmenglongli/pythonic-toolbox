@@ -70,7 +70,7 @@ def retry(func: Callable[..., T], tries: int = 1,
                     _tries -= 1
                     if _tries == 0:
                         raise e
-                    time.sleep(_delay)
+                    await asyncio.sleep(_delay)
                     _delay *= factor
     else:
         def decorated(*args, **kwargs):
