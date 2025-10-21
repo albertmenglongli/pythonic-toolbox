@@ -13,6 +13,135 @@ SPACE = ' '
 SHARP = '#'
 THREE_BACKTICKS = '```'
 
+MODULE_INTRODUCTIONS: Dict[str, str] = {
+    'decorators': (
+        'The `decorators` demos highlight reusable wrappers that harden function '
+        'interfaces, making call sites more forgiving and resilient to transient '
+        'failures.'
+    ),
+    'deque_utils': (
+        '`deque_utils` focuses on ergonomic helpers for Python\'s double-ended '
+        'queues, emphasizing efficient mutation patterns.'
+    ),
+    'dict_utils': (
+        'The `dict_utils` section collects richer dictionary abstractions and '
+        'traversal helpers for working with nested mappings.'
+    ),
+    'functional_utils': (
+        '`functional_utils` gathers lightweight functional-programming inspired '
+        'helpers that compose common iterable transformations.'
+    ),
+    'list_utils': (
+        'Utilities in `list_utils` provide expressive patterns for curation, '
+        'ordering, and restructuring of list data.'
+    ),
+    'string_utils': (
+        'The `string_utils` module streamlines templating and value substitution '
+        'when building dynamic strings.'
+    ),
+    'context': (
+        '`context` demonstrates context managers that gracefully gate execution '
+        'paths based on runtime conditions.'
+    ),
+}
+
+FUNCTION_INTRODUCTIONS: Dict[str, Dict[str, str]] = {
+    'decorators': {
+        'ignore_unexpected_kwargs': (
+            'Use `ignore_unexpected_kwargs` to accept forgiving keyword arguments '
+            'without altering core logic or signatures.'
+        ),
+        'retry': (
+            '`retry` wraps callables with configurable retry logic so transient '
+            'errors can be retried transparently.'
+        ),
+    },
+    'deque_utils': {
+        'deque_pop_any': (
+            '`deque_pop_any` removes the first matching element from a deque while '
+            'preserving O(n) traversal semantics.'
+        ),
+        'deque_split': (
+            '`deque_split` partitions a deque into multiple deques based on a '
+            'predicate, keeping operations efficient for queue-like workloads.'
+        ),
+    },
+    'dict_utils': {
+        'DictObj': (
+            '`DictObj` exposes dictionary keys as attributes, enabling dot-style '
+            'access in dynamic data structures.'
+        ),
+        'FinalDictObj': (
+            '`FinalDictObj` freezes dictionaries after construction, safeguarding '
+            'nested data against accidental mutation.'
+        ),
+        'RangeKeyDict': (
+            '`RangeKeyDict` associates lookup results with numeric ranges, yielding '
+            'logarithmic-time queries backed by bisect searches.'
+        ),
+        'StrKeyIdDict': (
+            '`StrKeyIdDict` assigns deterministic integer identifiers to string '
+            'keys while maintaining bidirectional lookups.'
+        ),
+        'collect_leaves': (
+            '`collect_leaves` traverses nested dictionaries and gathers terminal '
+            'values into a flat structure.'
+        ),
+        'dict_until': (
+            '`dict_until` repeatedly applies mutations to a mapping until a '
+            'predicate signals completion.'
+        ),
+        'select_list_of_dicts': (
+            '`select_list_of_dicts` filters lists of dictionaries using expressive '
+            'selection predicates.'
+        ),
+        'unique_list_of_dicts': (
+            '`unique_list_of_dicts` collapses dictionaries into a unique list based '
+            'on configurable identity keys.'
+        ),
+        'walk_leaves': (
+            '`walk_leaves` yields a generator over nested key paths and leaf values '
+            'for introspection-heavy workflows.'
+        ),
+    },
+    'functional_utils': {
+        'filter_multi': (
+            '`filter_multi` composes multiple predicates for iterative filtering, '
+            'with `lfilter_multi` providing a list materialization helper.'
+        ),
+    },
+    'list_utils': {
+        'filter_allowable': (
+            '`filter_allowable` retains items that match allowable values, whether '
+            'they are literal matches or resolved dynamically.'
+        ),
+        'sort_with_custom_orders': (
+            '`sort_with_custom_orders` sorts sequences according to bespoke '
+            'priority orders or fallback comparators.'
+        ),
+        'unpack_list': (
+            '`unpack_list` unpacks nested iterables into positional variables with '
+            'clear error reporting.'
+        ),
+        'until': (
+            '`until` iterates through data until a stopping condition is met, '
+            'mirroring familiar functional-programming patterns.'
+        ),
+    },
+    'string_utils': {
+        'substitute_string_template_dict': (
+            '`substitute_string_template_dict` safely fills placeholders in string '
+            'templates using dictionary-based parameters.'
+        ),
+    },
+    'context': {
+        'SkipContext': (
+            '`SkipContext` conditionally suppresses execution within a context '
+            'manager, ideal for pre-emptive locking or runtime flags.'
+        ),
+    },
+}
+
 URL_PREFIX = "https://github.com/albertmenglongli/pythonic-toolbox/actions/workflows"
 BADGE_SUFFIX = "badge.svg?branch=master"
 
@@ -148,6 +277,9 @@ def main():
         pkg_name = testing_file_path.stem
         pkg_name_without_test_ = remove_prefix(pkg_name, 'test_')
         contents.append(SHARP * title_level + SPACE + pkg_name_without_test_)
+        module_intro = MODULE_INTRODUCTIONS.get(pkg_name_without_test_)
+        if module_intro:
+            contents.append(module_intro)
         pkg = __import__(pkg_name)
         name_func_pairs = get_functions_in_pkg(pkg)
         block_of_contents_map: DefaultDict[str, List[str]] = extract_block_of_contents(testing_file_path)
@@ -157,6 +289,9 @@ def main():
             title_level += 1
             func_name_without_test_ = remove_prefix(func_name, 'test_')
             contents.append(SHARP * title_level + SPACE + func_name_without_test_)
+            func_intro = FUNCTION_INTRODUCTIONS.get(pkg_name_without_test_, {}).get(func_name_without_test_)
+            if func_intro:
+                contents.append(func_intro)
 
             source_code_str = getsource(func)
             source_codes_lines = deque(source_code_str.split('\n'))
