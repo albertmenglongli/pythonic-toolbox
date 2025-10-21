@@ -65,7 +65,11 @@ pip3 install pythonic-toolbox --upgrade
 
 ### decorators
 
+The `decorators` demos highlight reusable wrappers that harden function interfaces, making call sites more forgiving and resilient to transient failures.
+
 #### ignore_unexpected_kwargs
+
+Use `ignore_unexpected_kwargs` to accept forgiving keyword arguments without altering core logic or signatures.
 
 ```python3
 import pytest
@@ -138,6 +142,8 @@ assert Person.greetings(**params)
 ```
 
 #### retry
+
+`retry` wraps callables with configurable retry logic so transient errors can be retried transparently.
 
 ```python3
 import pytest
@@ -303,7 +309,11 @@ finally:
 
 ### deque_utils
 
+`deque_utils` focuses on ergonomic helpers for Python's double-ended queues, emphasizing efficient mutation patterns.
+
 #### deque_pop_any
+
+`deque_pop_any` removes the first matching element from a deque while preserving O(n) traversal semantics.
 
 ```python3
 from collections import deque
@@ -339,6 +349,8 @@ assert exec_info.value.args[0] == 'pop from empty deque'
 
 #### deque_split
 
+`deque_split` partitions a deque into multiple deques based on a predicate, keeping operations efficient for queue-like workloads.
+
 ```python3
 import pytest
 
@@ -366,7 +378,11 @@ assert exec_info.value.args[0] == 'num must be integer: 0 <= num <= sys.maxsize'
 
 ### dict_utils
 
+The `dict_utils` section collects richer dictionary abstractions and traversal helpers for working with nested mappings.
+
 #### DictObj
+
+`DictObj` exposes dictionary keys as attributes, enabling dot-style access in dynamic data structures.
 
 ```python3
 from copy import deepcopy
@@ -592,6 +608,8 @@ assert team.leader == deep_copy_of_team.leader
 
 #### FinalDictObj
 
+`FinalDictObj` freezes dictionaries after construction, safeguarding nested data against accidental mutation.
+
 ```python3
 from typing import cast
 
@@ -662,6 +680,8 @@ assert team.leader == deep_copy_of_team.leader
 ```
 
 #### RangeKeyDict
+
+`RangeKeyDict` associates lookup results with numeric ranges, yielding logarithmic-time queries backed by bisect searches.
 
 ```python3
 import pytest
@@ -787,6 +807,8 @@ assert age_categories_map[Age(70)] == 'Seniors'
 
 #### StrKeyIdDict
 
+`StrKeyIdDict` assigns deterministic integer identifiers to string keys while maintaining bidirectional lookups.
+
 ```python3
 import pytest
 from pythonic_toolbox.utils.dict_utils import StrKeyIdDict
@@ -878,6 +900,8 @@ assert my_dict['1'] == 'a'
 
 #### collect_leaves
 
+`collect_leaves` traverses nested dictionaries and gathers terminal values into a flat structure.
+
 ```python3
 from pythonic_toolbox.utils.dict_utils import collect_leaves
 
@@ -943,6 +967,8 @@ assert collect_leaves(None) == []
 
 #### dict_until
 
+`dict_until` repeatedly applies mutations to a mapping until a predicate signals completion.
+
 ```python3
 from pythonic_toolbox.utils.dict_utils import dict_until
 
@@ -959,6 +985,8 @@ assert dict_until(data, keys=['pen_name'], terminate=lambda x: x is not None, de
 ```
 
 #### select_list_of_dicts
+
+`select_list_of_dicts` filters lists of dictionaries using expressive selection predicates.
 
 ```python3
 from pythonic_toolbox.utils.dict_utils import select_list_of_dicts
@@ -1033,6 +1061,8 @@ assert select_list_of_dicts(dict_lst, look_like={'sex': 'male'},
 
 #### unique_list_of_dicts
 
+`unique_list_of_dicts` collapses dictionaries into a unique list based on configurable identity keys.
+
 ```python3
 from pythonic_toolbox.utils.dict_utils import unique_list_of_dicts
 
@@ -1058,6 +1088,8 @@ assert unique_list_of_dicts([]) == []
 ```
 
 #### walk_leaves
+
+`walk_leaves` yields a generator over nested key paths and leaf values for introspection-heavy workflows.
 
 ```python3
 from pythonic_toolbox.utils.dict_utils import walk_leaves
@@ -1102,7 +1134,11 @@ assert walk_leaves({}, inplace=True) is None
 
 ### functional_utils
 
+`functional_utils` gathers lightweight functional-programming inspired helpers that compose common iterable transformations.
+
 #### filter_multi
+
+`filter_multi` composes multiple predicates for iterative filtering, with `lfilter_multi` providing a list materialization helper.
 
 ```python3
 from pythonic_toolbox.utils.functional_utils import lfilter_multi, filter_multi
@@ -1145,7 +1181,11 @@ for idx, value in enumerate(filter_multi([is_even, is_divisible_by_5], count(sta
 
 ### list_utils
 
+Utilities in `list_utils` provide expressive patterns for curation, ordering, and restructuring of list data.
+
 #### filter_allowable
+
+`filter_allowable` retains items that match allowable values, whether they are literal matches or resolved dynamically.
 
 ```python3
 from pythonic_toolbox.utils.list_utils import filter_allowable
@@ -1180,6 +1220,8 @@ assert list(filter_allowable(candidates=[], allow_list=[], block_list=[])) == []
 ```
 
 #### sort_with_custom_orders
+
+`sort_with_custom_orders` sorts sequences according to bespoke priority orders or fallback comparators.
 
 ```python3
 from operator import itemgetter
@@ -1280,6 +1322,8 @@ assert sort_with_custom_orders(persons, prefix_orders=[Menglong, Person(4, 'Anyo
 
 #### unpack_list
 
+`unpack_list` unpacks nested iterables into positional variables with clear error reporting.
+
 ```python3
 import pytest
 from pythonic_toolbox.utils.list_utils import unpack_list
@@ -1341,6 +1385,8 @@ with pytest.raises(ValueError):
 
 #### until
 
+`until` iterates through data until a stopping condition is met, mirroring familiar functional-programming patterns.
+
 ```python3
 from itertools import count
 
@@ -1378,7 +1424,11 @@ assert until(numbers, lambda x: x >= 5, default=None, max_iter_num=100) == 5
 
 ### string_utils
 
+The `string_utils` module streamlines templating and value substitution when building dynamic strings.
+
 #### substitute_string_template_dict
+
+`substitute_string_template_dict` safely fills placeholders in string templates using dictionary-based parameters.
 
 ```python3
 from unittest.mock import patch, PropertyMock
@@ -1456,7 +1506,11 @@ with pytest.raises(CycleError) as exec_info:
 
 ### context
 
+`context` demonstrates context managers that gracefully gate execution paths based on runtime conditions.
+
 #### SkipContext
+
+`SkipContext` conditionally suppresses execution within a context manager, ideal for pre-emptive locking or runtime flags.
 
 ```python3
 import itertools
